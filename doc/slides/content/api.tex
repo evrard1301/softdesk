@@ -1,5 +1,35 @@
 \section{API REST}
 
 \begin{frame}{API REST}
-  
+  \begin{block}{Les ressources}
+    \begin{center}
+      \begin{tabular}{|r|l|}
+        \hline
+        Nom & URI \\
+        \hline
+        \hline
+        Projet & $/projects/$ \\
+        Collaborateur & $/projects/\{id\}/users/$ \\
+        Problème & $/projects/\{id\}/issues/$ \\
+        Commentaires & $/projects/\{id\}/issues/\{id\}/comments/$ \\
+        \hline
+      \end{tabular}
+    \end{center}
+  \end{block}
+
+  \begin{block}{Actions}
+    \begin{center}
+      \begin{tabular}{|r|l|}
+        \hline
+        Création & POST \\
+        \hline
+        Accès & GET \\
+        \hline
+        Mise à jour & PUT \\
+        \hline
+        Suppression & DELETE \\
+        \hline
+      \end{tabular}
+    \end{center}
+  \end{block}
 \end{frame}
