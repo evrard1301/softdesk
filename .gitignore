@@ -1,0 +1,7 @@
+# LaTeX Stuff
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc

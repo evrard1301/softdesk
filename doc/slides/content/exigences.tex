@@ -1,0 +1,47 @@
+\section{Exigences}
+
+\begin{frame}{Exigences}
+  \begin{block}{Exigences fonctionnelles}
+    \begin{itemize}
+    \item En tant qu'utilisateur nous pouvons \textbf{nous authentifier}.
+    \item En tant qu'utilisateur nous pouvons \textbf{manipuler des projets}.
+    \item En tant que contributeur d'un projet nous pouvons
+      \textbf{manipuler les problèmes} qui lui sont liés.
+    \item En tant que contributeur d'un projet nous pouvons
+      \textbf{commenter les problèmes} qui lui sont liés.
+    \item En tant qu'auteur d'un problème, d'un projet, ou d'un
+      commentaire nous pouvons l'\textbf{actualiser et le supprimer}.
+    \item En tant qu'auteur d'un projet nous pouvons \textbf{ajouter
+      ou supprimer un collaborateur}.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Différents droits d'accès}
+  \begin{block}{Droits d'accès}
+    \begin{center}
+      \small
+      \begin{tabular}{|r|c|c|c|}
+        \hline
+        & Auteur & Collaborateur & Utilisateur \\
+        \hline
+        créer un projet & \checkmark & \checkmark & \checkmark \\
+        consulter un projet & \checkmark & \checkmark & - \\
+        éditer un projet & \checkmark & - & - \\
+        supprimer un projet & \checkmark & - & - \\
+        \hline
+        créer un problème & \checkmark & \checkmark & - \\
+        consulter un problème & \checkmark & \checkmark & - \\
+        éditer un problème & \checkmark & - & - \\
+        supprimer un problème & \checkmark & - & - \\
+        \hline
+        créer un commentaire & \checkmark & \checkmark & - \\
+        consulter un commentaire & \checkmark & \checkmark & - \\
+        éditer un commentaire & \checkmark & - & - \\
+        supprimer un commentaire & \checkmark & - & - \\
+        
+        \hline
+      \end{tabular}
+    \end{center}
+  \end{block}
+\end{frame}
