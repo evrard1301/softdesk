@@ -1,5 +1,86 @@
 \section{Documentation}
 
-\begin{frame}{Documentation}
+\begin{frame}{Documentation}  
+\end{frame}
+
+\begin{frame}{Pourquoi documenter ?}
+  \begin{block}{Plusieurs raisons de maintenir la documentation d'un projet}
+    \begin{itemize}
+    \item TODO
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Quoi documenter ?}
+  \begin{block}{Tout au long du cycle de vie du logiciel}
+    \begin{itemize}
+    \item Les exigences (cahier des charges)
+    \item Le développement (dans le code source et la documentation externe)
+    \item Les tests (plan de test, stratégie de test, ...)
+    \item Les analyses et audits
+    \item Le manuel pour utilisateurs ou développeurs
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Documentation et développement}
+  \begin{block}{\textit{Documentation Driven Development}}
+    \begin{itemize}
+    \item Mise en place d'une documentation \textbf{avant} l'implémentation.
+    \end{itemize}
+  \end{block}
+
   
+  \begin{block}{Documentation de l'API}
+    \begin{itemize}
+    \item Documentation \textit{via} un wiki directement depuis \textit{github}.
+    \item Utilisation de \textsf{sphinx}
+    \end{itemize}
+  \end{block}  
+\end{frame}
+
+\begin{frame}{Documenter le code}
+  \begin{block}{Sphinx}
+    \begin{itemize}
+    \item Utilisée par \textsf{read the docs}
+    \item Permet de créer une documentation à partir de fichiers
+      \textsf{reStructuredText}.
+    \end{itemize}
+  \end{block}  
+\end{frame}
+
+\begin{frame}[fragile]{Documentation: Sphinx}
+  \tiny
+  \begin{center}
+    \begin{figure}
+      \begin{lstlisting}
+        This is a Title
+        ===============
+        That has a paragraph about a main subject and is set when the '='
+        is at least the same length of the title itself.
+
+        Subject Subtitle
+        ----------------
+        Subtitles are set with '-' and are required to have the same length
+        of the subtitle itself, just like titles.
+
+        Lists can be unnumbered like:
+
+        * Item Foo
+        * Item Bar
+
+        Or automatically numbered:
+
+        #. Item 1
+        #. Item 2
+
+        Inline Markup
+        -------------
+        Words can have *emphasis in italics* or be **bold** and you can define
+        code samples with back quotes, like when you talk about a command: ``sudo``
+        gives you super user powers!
+      \end{lstlisting}      
+      \caption{Exemple de document rédigé \textit{via} la syntaxe \textsf{reStructuredText}}      
+    \end{figure}
+  \end{center}
 \end{frame}

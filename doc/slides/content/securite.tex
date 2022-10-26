@@ -1,5 +1,74 @@
 \section{Sécurité}
 
-\begin{frame}{Sécurité}
-  
+\begin{frame}{Sécurité}  
 \end{frame}
+
+\begin{frame}{Enjeux de la sécurité}
+
+  \begin{block}{Tout est une question de \underline{risques}}
+    Risque = un impact x probabilité d'occurrence
+  \end{block}
+
+  \begin{block}{Rédaction d'un modèle de menaces (\textit{threats modelling})}
+    Quatre questions à se poser\footnote{\url{https://owasp.org/www-community/Threat_Modeling}}:
+    \begin{itemize}
+    \item Sur quoi travaillons-nous ?
+    \item Qu'est-ce qu'il pourrait arriver de mauvais ?
+    \item Quoi faire si cela arrive ?
+    \item Avons-nous fait du bon travail ?
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{OWASP 2017}
+  \begin{block}{Le top 10 des menaces de sécurité}
+    \begin{enumerate}
+    \item TODO enumeration des menaces
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Sécurité mise en place par Django}
+  TODO: qu'est-ce que django fait automatiquement ?
+  \newline
+  TODO: quoi configurer ?
+  \newline
+  TODO: comment configurer ?
+\end{frame}
+
+\begin{frame}{Renforcer la sécurité}
+  \begin{block}{Sécurité supplémentaire}
+    \begin{itemize}
+    \item Authentification par nom d'utilisateur et mot de passe:
+      \begin{itemize}
+      \item Vérification de la sécurité du mot de passe (TODO: voir django password validator)
+      \end{itemize}
+    \item Mise en place d'un système de rôles:
+      \begin{itemize}
+      \item Administrateur
+      \item Auteur d'un projet, d'un problème ou d'un commentaire
+      \item Collaborateur
+      \item Utilisateur
+      \end{itemize}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Tester la sécurité de l'API}
+  \begin{block}{Différents types de tests}
+    \begin{itemize}
+    \item \textit{Scan} de vulnérabilités
+    \item Tests de pénétrations
+    \item Audits de sécurité
+    \item ...
+    \end{itemize}
+
+    Comment tester la sécurité de l'API ?
+  \end{block}
+
+  \begin{block}{$\rightarrow$ \textit{Via} les tests de Django}
+    TODO: différents niveau de tests, ici on parle de tests non fonctionnels d'acceptations
+    et non pas de tests fonctionnels unitaires ($\rightarrow$ en complément, non pas à la place).
+  \end{block}
+\end{frame}
+
