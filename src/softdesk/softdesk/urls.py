@@ -16,13 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from authentication import views as auth_views
 
 
 router = routers.DefaultRouter()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v0/', include('authentication.urls')),
     path('api/v0/', include(router.urls)),
-    path('api/v0/signup/', auth_views.SignupView.as_view(), name='signup')
 ]
