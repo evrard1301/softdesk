@@ -5,3 +5,8 @@
 *.out
 *.snm
 *.toc
+*.vrb
+
+env
+__pycache__
+docs/build
