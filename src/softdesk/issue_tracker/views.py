@@ -18,6 +18,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
         project.save()
         return Response({})
 
+    def list(self, request):
+        projects = models.Project.objects.filter(author=request.user).all()
+        data = serializers.ProjectSerializer(projects, many=True).data
+        return Response(data)
+
     def get_queryset(self):
         return models.Project.objects.all()
 
