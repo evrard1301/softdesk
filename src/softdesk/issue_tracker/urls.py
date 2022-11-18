@@ -9,7 +9,7 @@ router.register('projects', views.ProjectViewSet, basename='projects')
 
 urlpatterns = [
     path('projects/<int:id>/users/',
-         views.ContributorAPIView.as_view({'post': 'create'}),
-         name='contributor-create'),
+         views.ContributorAPIView.as_view({'post': 'create', 'get': 'list'}),
+         name='contributor'),
     path('', include(router.urls))
 ]

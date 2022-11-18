@@ -95,7 +95,7 @@ class ProjectTest(TestCase):
         contributors = models.Contributor.objects.filter(project=project)
         self.assertEqual(0, len(contributors))
         
-        client.post(reverse_lazy('issue_tracker:contributor-create',
+        client.post(reverse_lazy('issue_tracker:contributor',
                                  args=[project.id]), {
             'user_id': contributor.id
         })
@@ -119,7 +119,7 @@ class ProjectTest(TestCase):
 
         models.Contributor.objects.create(user=contributor, project=project)
                 
-        response = client.post(reverse_lazy('issue_tracker:contributor-create',
+        response = client.post(reverse_lazy('issue_tracker:contributor',
                                             args=[project.id]), {
             'user_id': contributor.id
         })
@@ -143,7 +143,7 @@ class ProjectTest(TestCase):
         contributors = models.Contributor.objects.filter(project=project)
         self.assertEqual(0, len(contributors))
         
-        response = client.post(reverse_lazy('issue_tracker:contributor-create',
+        response = client.post(reverse_lazy('issue_tracker:contributor',
                                             args=[project.id]), {
             'user_id': contributor.id
         })
@@ -171,11 +171,104 @@ class ProjectTest(TestCase):
         contributors = models.Contributor.objects.filter(project=project)
         self.assertEqual(0, len(contributors))
         
-        response = client.post(reverse_lazy('issue_tracker:contributor-create',
+        response = client.post(reverse_lazy('issue_tracker:contributor',
                                             args=[project.id]), {
                                             'user_id': contributor.id
         })
         
         contributors = models.Contributor.objects.filter(project=project)
         self.assertEqual(0, len(contributors))
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ok_list_contributors_by_owner(self):
+        client = APIClient()
+        bob = User.objects.create_user(username='bob', password='aze')
+        claire = User.objects.create_user(username='claire', password='aze')
+        dan = User.objects.create_user(username='dan', password='aze')
+        User.objects.create_user(username='evarist', password='aze')
+        User.objects.create_user(username='frank', password='aze')
+        
+        project = models.Project(author=self.user,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        project.save()
+        
+        client.force_authenticate(self.user)
+        
+        models.Contributor.objects.create(user=bob, project=project)
+        models.Contributor.objects.create(user=claire, project=project)
+        models.Contributor.objects.create(user=dan, project=project)
+
+        response = client.get(reverse_lazy('issue_tracker:contributor',
+                                           args=[project.id]))
+        
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(4, len(response.data))
+        self.assertEqual(self.user.username, response.data[0]['username'])
+        self.assertEqual('bob', response.data[1]['username'])
+        self.assertEqual('claire', response.data[2]['username'])
+        self.assertEqual('dan', response.data[3]['username'])
+        
+    def test_ok_list_contributors_by_contributor(self):
+        client = APIClient()
+        bob = User.objects.create_user(username='bob', password='aze')
+        claire = User.objects.create_user(username='claire', password='aze')
+        dan = User.objects.create_user(username='dan', password='aze')
+        User.objects.create_user(username='evarist', password='aze')
+        User.objects.create_user(username='frank', password='aze')
+        
+        project = models.Project(author=bob,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        project.save()
+        
+        client.force_authenticate(self.user)
+        
+        models.Contributor.objects.create(user=self.user, project=project)
+        models.Contributor.objects.create(user=claire, project=project)
+        models.Contributor.objects.create(user=dan, project=project)
+
+        response = client.get(reverse_lazy('issue_tracker:contributor',
+                                           args=[project.id]))
+        
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(4, len(response.data))
+        self.assertEqual('bob', response.data[0]['username'])
+        self.assertEqual(self.user.username, response.data[1]['username'])
+        self.assertEqual('claire', response.data[2]['username'])
+        self.assertEqual('dan', response.data[3]['username'])
+        
+    def test_err_list_contributors_not_authenticated(self):
+        client = APIClient()
+        bob = User.objects.create_user(username='bob', password='aze')
+        
+        project = models.Project(author=self.user,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        project.save()
+        
+        models.Contributor.objects.create(user=bob, project=project)
+
+        response = client.get(reverse_lazy('issue_tracker:contributor',
+                                           args=[project.id]))
+        
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_err_list_contributors_not_contributor(self):
+        client = APIClient()
+        bob = User.objects.create_user(username='bob', password='aze')
+        
+        project = models.Project(author=bob,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        project.save()
+        client.force_authenticate(self.user)
+
+        response = client.get(reverse_lazy('issue_tracker:contributor',
+                                           args=[project.id]))
+        
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)

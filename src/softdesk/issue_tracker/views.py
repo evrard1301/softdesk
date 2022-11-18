@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from . import models
 from authentication import models as auth_models
+from authentication import serializers as auth_serializers
 from . import serializers
 from . import permissions
 
@@ -36,11 +37,21 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     serializer_class = serializers.ContributorSerializer
-    permission_classes = [
-        rest_permissions.IsAuthenticated,
-        permissions.IsProjectAuthor
-    ]
 
+    def get_permissions(self):
+        perms = {
+            'create': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectAuthor()
+            ],
+            'list': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectContributor()
+            ]
+        }
+        
+        return perms.get(self.action, perms.get('create'))
+    
     def create(self, request, *args, **kwargs):
         user = get_object_or_404(auth_models.User,
                                  pk=request.POST.get('user_id'))
@@ -56,3 +67,11 @@ class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         contributor.save()
         
         return Response(serializers.ContributorSerializer(contributor).data)
+
+    def list(self, *args, **kwargs):
+        project = get_object_or_404(models.Project, pk=kwargs['id'])
+        contributors = models.Contributor.objects.filter(project=project.id)
+        users = [ project.author ] + [contrib.user for contrib in contributors]
+        ser = auth_serializers.UserSerializer(users, many=True)
+        
+        return Response(ser.data)

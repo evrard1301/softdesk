@@ -12,3 +12,11 @@ POST /projects/{id}/users
 Parameters
 ~~~~~~~~~~
 * **user_id** the ID of the user to grant.
+
+List Contributors
+-----------------
+Given a project, returns a list of all its contributors.
+
+Endpoint
+~~~~~~~~
+GET /projects/{id}/users
