@@ -10,7 +10,7 @@ class ProjectTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='alice',
                                              password='alice-password')
-
+    
     def test_ok_create_project(self):
         client = APIClient()
         client.force_authenticate(user=self.user)
@@ -187,9 +187,9 @@ class ProjectTest(TestCase):
         
         project = \
             models.Project.create_project(bob,
-                                                  title='My awesome project',
-                                                  description='aaaaaawesome',
-                                                  type=models.Project.BACK_END)
+                                          title='My awesome project',
+                                          description='aaaaaawesome',
+                                          type=models.Project.BACK_END)
         project.save()
         
         client.force_authenticate(self.user)
@@ -242,3 +242,112 @@ class ProjectTest(TestCase):
                                            args=[project.id]))
         
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ok_remove_contributor(self):
+        client = APIClient()
+        client.force_authenticate(self.user)
+        bob = User.objects.create_user(username='bob', password='azerty')
+        project = models.Project.create_project(self.user, 'hello')
+
+        models.Contributor.objects\
+                          .create(user=bob,
+                                  project=project,
+                                  role=models.Contributor.ROLE_TEAMMATE)
+        
+        self.assertEqual(1,
+                         models.Contributor.objects.filter(user=bob).count())
+        
+        client.delete(reverse_lazy('issue_tracker:contributor',
+                                   args=[project.id]), {
+                                       'user_id': bob.id
+                                   })
+
+        self.assertEqual(0,
+                         models.Contributor.objects.filter(user=bob).count())    
+
+    def test_err_remove_contributor_target_not_contributor(self):
+        client = APIClient()
+        client.force_authenticate(self.user)
+        bob = User.objects.create_user(username='bob', password='azerty')
+        project = models.Project.create_project(self.user, 'hello')
+        
+        response = client.delete(reverse_lazy('issue_tracker:contributor',
+                                              args=[project.id]), {
+                                                  'user_id': bob.id
+                                              })
+
+        self.assertEqual(status.HTTP_404_NOT_FOUND,
+                         response.status_code)    
+    
+    def test_err_remove_contributor_not_authenticated(self):
+        client = APIClient()
+
+        bob = User.objects.create_user(username='bob', password='azerty')
+        project = models.Project.create_project(self.user, 'hello')
+
+        models.Contributor.objects\
+                          .create(user=bob,
+                                  project=project,
+                                  role=models.Contributor.ROLE_TEAMMATE)
+        
+        self.assertEqual(1,
+                         models.Contributor.objects.filter(user=bob).count())
+        
+        response = client.delete(reverse_lazy('issue_tracker:contributor',
+                                              args=[project.id]), {
+                                                  'user_id': bob.id
+                                              })
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_err_remove_contributor_not_owner(self):
+        client = APIClient()
+        
+        claire = User.objects.create_user(username='claire', password='azerty')
+        
+        bob = User.objects.create_user(username='bob', password='azerty')
+        project = models.Project.create_project(claire, 'hello')
+
+        models.Contributor.objects\
+                          .create(user=bob,
+                                  project=project,
+                                  role=models.Contributor.ROLE_TEAMMATE)
+        
+        self.assertEqual(1,
+                         models.Contributor.objects.filter(user=bob).count())
+        
+        response = client.delete(reverse_lazy('issue_tracker:contributor',
+                                              args=[project.id]), {
+                                                  'user_id': bob.id
+                                              })
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_err_remove_contributor_not_owner_but_contributor(self):
+        client = APIClient()
+        client.force_authenticate(self.user)
+        claire = User.objects.create_user(username='claire', password='azerty')
+        bob = User.objects.create_user(username='bob', password='azerty')
+        project = models.Project.create_project(claire, 'hello')
+
+        models.Contributor.objects\
+                          .create(user=bob,
+                                  project=project,
+                                  role=models.Contributor.ROLE_TEAMMATE)
+        
+        models.Contributor.objects\
+                          .create(user=self.user,
+                                  project=project,
+                                  role=models.Contributor.ROLE_TEAMMATE)
+        
+        self.assertEqual(1,
+                         models.Contributor.objects.filter(user=bob).count())
+        
+        response = client.delete(reverse_lazy('issue_tracker:contributor',
+                                              args=[project.id]), {
+                                                  'user_id': bob.id
+                                              })
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+

@@ -48,6 +48,10 @@ class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectAuthor()
             ],
+            'delete': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectAuthor()
+            ],
             'list': [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectContributor()
@@ -79,3 +83,17 @@ class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         ser = auth_serializers.UserSerializer(users, many=True)
         
         return Response(ser.data)
+    
+    def delete(self, request, *args, **kwargs):
+        project = get_object_or_404(models.Project, pk=kwargs.get('id'))
+        user = \
+            get_object_or_404(auth_models.User, pk=request.POST.get('user_id'))
+        
+        contrib = models.Contributor.objects.filter(project=project, user=user)
+
+        if not contrib:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+        contrib.delete()
+        
+        return Response({})
