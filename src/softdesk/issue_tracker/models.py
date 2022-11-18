@@ -21,3 +21,9 @@ class Project(models.Model):
     type = models.CharField(max_length=128,
                             choices=PROJECT_TYPES,
                             default=BACK_END)
+
+
+class Contributor(models.Model):
+    user = models.ForeignKey(auth_models.User, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    

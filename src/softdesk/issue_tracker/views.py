@@ -1,10 +1,13 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import mixins
+from rest_framework import permissions as rest_permissions
+from rest_framework import status
 from rest_framework.response import Response
 from . import models
+from authentication import models as auth_models
 from . import serializers
-
+from . import permissions
 
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ProjectSerializer
@@ -27,4 +30,29 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return models.Project.objects.all()
 
     def get_permissions(self):
-        return [permissions.IsAuthenticated()]
+        return [rest_permissions.IsAuthenticated()]
+
+
+class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
+
+    serializer_class = serializers.ContributorSerializer
+    permission_classes = [
+        rest_permissions.IsAuthenticated,
+        permissions.IsProjectAuthor
+    ]
+
+    def create(self, request, *args, **kwargs):
+        user = get_object_or_404(auth_models.User,
+                                 pk=request.POST.get('user_id'))
+
+        project = get_object_or_404(models.Project, pk=kwargs.get('id'))        
+
+        if models.Contributor.objects.filter(user=user,
+                                             project=project).count() > 0:
+            return Response(data={'status': 'already a contributor'},
+                            status=status.HTTP_409_CONFLICT)
+        
+        contributor = models.Contributor(user=user, project=project)
+        contributor.save()
+        
+        return Response(serializers.ContributorSerializer(contributor).data)

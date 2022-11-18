@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse_lazy
 from rest_framework.test import APIClient
+from rest_framework import status
 from . import models
 from authentication.models import User
 
@@ -20,7 +21,7 @@ class ProjectTest(TestCase):
             'type': 'IOS'
         })
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(1, models.Project.objects.count())
         project = models.Project.objects.all()[0]
         self.assertEqual(self.user, project.author)
@@ -37,7 +38,7 @@ class ProjectTest(TestCase):
             'type': 'IOS'
         })
 
-        self.assertNotEqual(200, response.status_code)
+        self.assertNotEqual(status.HTTP_200_OK, response.status_code)
 
     def test_ok_query_list(self):
         models.Project.objects.create(author=self.user,
@@ -66,7 +67,7 @@ class ProjectTest(TestCase):
 
         response = client.get(reverse_lazy('issue_tracker:projects-list'))
 
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
 
         self.assertEqual(3, len(response.data))
         self.assertEqual('project 1', response.data[0]['title'])
@@ -76,4 +77,105 @@ class ProjectTest(TestCase):
     def test_err_query_list_not_authenticated(self):
         client = APIClient()
         response = client.get(reverse_lazy('issue_tracker:projects-list'))
-        self.assertNotEqual(200, response.status_code)
+        self.assertNotEqual(status.HTTP_200_OK, response.status_code)
+
+    def test_ok_add_contributor(self):
+        client = APIClient()
+        client.force_authenticate(self.user)
+        contributor = User.objects.create_user(username='bob',
+                                               password='bob-password')
+        
+        project = models.Project(author=self.user,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        
+        project.save()
+
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(0, len(contributors))
+        
+        client.post(reverse_lazy('issue_tracker:contributor-create',
+                                 args=[project.id]), {
+            'user_id': contributor.id
+        })
+        
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(1, len(contributors))
+        self.assertEqual(contributor.id, contributors[0].user.id)
+
+    def test_err_add_contributor_already_added(self):
+        client = APIClient()
+        client.force_authenticate(self.user)
+        contributor = User.objects.create_user(username='bob',
+                                               password='bob-password')
+        
+        project = models.Project(author=self.user,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        
+        project.save()
+
+        models.Contributor.objects.create(user=contributor, project=project)
+                
+        response = client.post(reverse_lazy('issue_tracker:contributor-create',
+                                            args=[project.id]), {
+            'user_id': contributor.id
+        })
+        
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(1, len(contributors))
+        self.assertEqual(status.HTTP_409_CONFLICT, response.status_code)
+
+    def test_err_add_contributor_not_authenticated(self):
+        client = APIClient()
+        contributor = User.objects.create_user(username='bob',
+                                               password='bob-password')
+        
+        project = models.Project(author=self.user,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        
+        project.save()
+
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(0, len(contributors))
+        
+        response = client.post(reverse_lazy('issue_tracker:contributor-create',
+                                            args=[project.id]), {
+            'user_id': contributor.id
+        })
+        
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(0, len(contributors))
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_err_add_contributor_not_project_owner(self):
+        client = APIClient()
+        client.force_authenticate(self.user)
+        owner = User.objects.create_user(username='claire',
+                                         password='claire-password')
+
+        contributor = User.objects.create_user(username='bob',
+                                               password='bob-password')
+        
+        project = models.Project(author=owner,
+                                 title='My awesome project',
+                                 description='aaaaaawesome',
+                                 type=models.Project.BACK_END)
+        
+        project.save()
+
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(0, len(contributors))
+        
+        response = client.post(reverse_lazy('issue_tracker:contributor-create',
+                                            args=[project.id]), {
+                                            'user_id': contributor.id
+        })
+        
+        contributors = models.Contributor.objects.filter(project=project)
+        self.assertEqual(0, len(contributors))
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
