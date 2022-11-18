@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
-from rest_framework import mixins
 from rest_framework import permissions as rest_permissions
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from . import models
 from authentication import models as auth_models
@@ -11,89 +11,40 @@ from . import serializers
 from . import permissions
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    serializer_class = serializers.ProjectSerializer
-
-    def create(self, request):
-        data = request.data
-        project = models.Project.create_project(
-            request.user,
-            title=data.get('title'),
-            description=data.get('description'),
-            type=data.get('type')
-        )
-        
-        project.save()
-        
-        return Response({})
-
-    def list(self, request):
-        # TODO
-        return Response({})
-
-    def get_queryset(self):
-        return models.Project.objects.all()
-
-    def get_permissions(self):
-        return [rest_permissions.IsAuthenticated()]
-
-
-class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
-
-    serializer_class = serializers.ContributorSerializer
+class ProjectViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         perms = {
             'create': [
-                rest_permissions.IsAuthenticated(),
-                permissions.IsProjectAuthor()
-            ],
-            'delete': [
-                rest_permissions.IsAuthenticated(),
-                permissions.IsProjectAuthor()
-            ],
-            'list': [
-                rest_permissions.IsAuthenticated(),
-                permissions.IsProjectContributor()
+                rest_permissions.IsAuthenticated()
             ]
         }
-        
-        return perms.get(self.action, perms.get('create'))
-    
-    def create(self, request, *args, **kwargs):
-        user = get_object_or_404(auth_models.User,
-                                 pk=request.POST.get('user_id'))
 
-        project = get_object_or_404(models.Project, pk=kwargs.get('id'))        
+        return perms.get(self.action)
+        
+    def create(self, request):
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        type = request.POST.get('type')
 
-        if models.Contributor.objects.filter(user=user,
-                                             project=project).count() > 0:
-            return Response(data={'status': 'already a contributor'},
-                            status=status.HTTP_409_CONFLICT)
-        
-        contributor = models.Contributor(user=user, project=project)
-        contributor.save()
-        
-        return Response(serializers.ContributorSerializer(contributor).data)
+        project = models.Project(title=title,
+                                 description=description,
+                                 type=type)
 
-    def list(self, *args, **kwargs):
-        project = get_object_or_404(models.Project, pk=kwargs['id'])
-        contributors = models.Contributor.objects.filter(project=project.id)
-        users = [contrib.user for contrib in contributors]
-        ser = auth_serializers.UserSerializer(users, many=True)
+        try:
+            project.full_clean()
         
-        return Response(ser.data)
-    
-    def delete(self, request, *args, **kwargs):
-        project = get_object_or_404(models.Project, pk=kwargs.get('id'))
-        user = \
-            get_object_or_404(auth_models.User, pk=request.POST.get('user_id'))
-        
-        contrib = models.Contributor.objects.filter(project=project, user=user)
+            project.save()
 
-        if not contrib:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            models.Contributor.objects.create(project=project,
+                                              user=request.user,
+                                              role=models.Contributor.ROLE_OWNER)
+
+            ser = serializers.ProjectSerializer(project)
+            
+            return Response(data=ser.data,
+                            status=status.HTTP_200_OK)
+        except ValidationError:
+            return Response(data={}, status=status.HTTP_400_BAD_REQUEST)
+
         
-        contrib.delete()
-        
-        return Response({})

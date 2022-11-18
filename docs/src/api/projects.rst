@@ -15,3 +15,6 @@ Parameters
 * **description** an optional description for the new project.
 * **type** the type of the new project: "back-end", "front-end", "IOS" or "Android".
 
+Returns
+~~~~~~~
+Returns the brand new project.
