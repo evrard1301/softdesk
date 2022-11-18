@@ -10,22 +10,26 @@ from authentication import serializers as auth_serializers
 from . import serializers
 from . import permissions
 
+
 class ProjectViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.ProjectSerializer
 
     def create(self, request):
         data = request.data
-        project = models.Project(title=data.get('title'),
-                                 description=data.get('description'),
-                                 type=data.get('type'))
-        project.author = request.user
+        project = models.Project.create_project(
+            request.user,
+            title=data.get('title'),
+            description=data.get('description'),
+            type=data.get('type')
+        )
+        
         project.save()
+        
         return Response({})
 
     def list(self, request):
-        projects = models.Project.objects.filter(author=request.user).all()
-        data = serializers.ProjectSerializer(projects, many=True).data
-        return Response(data)
+        # TODO
+        return Response({})
 
     def get_queryset(self):
         return models.Project.objects.all()
@@ -71,7 +75,7 @@ class ContributorAPIView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     def list(self, *args, **kwargs):
         project = get_object_or_404(models.Project, pk=kwargs['id'])
         contributors = models.Contributor.objects.filter(project=project.id)
-        users = [ project.author ] + [contrib.user for contrib in contributors]
+        users = [contrib.user for contrib in contributors]
         ser = auth_serializers.UserSerializer(users, many=True)
         
         return Response(ser.data)
