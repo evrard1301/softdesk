@@ -30,3 +30,19 @@ Returns
 ~~~~~~~
 
 All the contributors of the given project.
+
+Delete Contributor
+------------------
+
+Delete a contributor of a project. The user still exists but he/she
+doesn't belongs to the given project anymore
+
+Endpoint
+~~~~~~~~
+
+DELETE /projects/{id}/users/{id}
+
+Returns
+~~~~~~~
+
+The contributor just removed.

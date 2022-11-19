@@ -110,7 +110,10 @@ class ContributorViewSet(viewsets.ViewSet):
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectOwner()
             ],
-
+            'destroy': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectOwner()
+            ],
             'list': [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectContributor()
@@ -153,3 +156,19 @@ class ContributorViewSet(viewsets.ViewSet):
         data = auth_serializers.UserSerializer(users, many=True).data
 
         return Response(data)
+
+    def destroy(self, request, project_pk, pk):
+        project = get_object_or_404(models.Project, pk=project_pk)
+        user = get_object_or_404(auth_models.User, pk=pk)
+        self.check_object_permissions(request, project)
+        
+        res = models.Contributor.objects.filter(project=project,
+                                                user=user)
+        
+        data = auth_serializers.UserSerializer(user).data
+        
+        if len(res) == 1:
+            user.delete()
+        
+        return Response(data)
+        

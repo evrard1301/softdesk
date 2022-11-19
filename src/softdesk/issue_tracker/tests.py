@@ -322,3 +322,90 @@ class ContributorTest(TestCase):
         )
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ok_delete_contributor(self):
+        self.client.force_authenticate(self.user)
+        project = models.Project.create_project(self.user, 'project')
+
+        models.Contributor.objects.create(
+            user=self.bob,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        self.assertEqual(
+            1,
+            models.Contributor.objects.filter(
+                project=project,
+                user=self.bob
+            ).count()
+        )
+        
+        response = self.client.delete(
+            reverse_lazy(
+                'issue_tracker:contributors-detail',
+                args=[
+                    project.id,
+                    self.bob.id
+                ]
+            )
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(
+            0,
+            models.Contributor.objects.filter(
+                project=project,
+                user=self.bob
+            ).count()
+        )
+
+    def test_err_delete_contributor__only_teammate(self):
+        self.client.force_authenticate(self.user)
+        project = models.Project.create_project(self.bob, 'project')
+
+        models.Contributor.objects.create(
+            user=self.bob,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        response = self.client.delete(
+            reverse_lazy(
+                'issue_tracker:contributors-detail',
+                args=[
+                    project.id,
+                    self.bob.id
+                ]
+            )
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_err_delete_contributor__not_contributor(self):
+        self.client.force_authenticate(self.user)
+        project = models.Project.create_project(self.bob, 'project')
+
+        models.Contributor.objects.create(
+            user=self.bob,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        response = self.client.delete(
+            reverse_lazy(
+                'issue_tracker:contributors-detail',
+                args=[
+                    project.id,
+                    self.bob.id
+                ]
+            )
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
