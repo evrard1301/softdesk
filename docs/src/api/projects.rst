@@ -60,3 +60,12 @@ Parameters
 Returns
 ~~~~~~~
 Returns the updated version of the project.
+
+Delete Project
+--------------
+Delete a given project.
+
+Endpoint
+~~~~~~~~
+DELETE /projects/{id}/
+

@@ -28,6 +28,10 @@ class ProjectViewSet(viewsets.ViewSet):
             'update': [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectOwner()
+            ],
+            'destroy': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectOwner()
             ]
         }
 
@@ -91,3 +95,9 @@ class ProjectViewSet(viewsets.ViewSet):
         project.save()
         
         return Response(serializers.ProjectSerializer(project).data)
+    
+    def destroy(self, request, pk):
+        project = get_object_or_404(models.Project, pk=pk)
+        self.check_object_permissions(request, project)
+        project.delete()
+        return Response({})

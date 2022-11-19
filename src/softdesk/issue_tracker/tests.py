@@ -169,3 +169,31 @@ class ProjectTest(TestCase):
         self.assertEqual('my title', old_project.title)
         self.assertEqual('my desc', old_project.description)
         self.assertEqual(models.Project.ANDROID, old_project.type)
+
+    def test_ok_delete(self):
+        self.client.force_authenticate(self.user)
+        project = models.Project.create_project(self.user, 'my project')
+
+        response = self.client.delete(
+            reverse_lazy('issue_tracker:projects-detail',
+                         args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(0, models.Project.objects.count())
+        
+    def test_err_delete__not_owner_but_contributor(self):
+        self.client.force_authenticate(self.user)
+        project = models.Project.create_project(self.bob, 'my project')
+        models.Contributor.objects.create(
+            user=self.user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+        response = self.client.delete(
+            reverse_lazy('issue_tracker:projects-detail',
+                         args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual(1, models.Project.objects.count())
