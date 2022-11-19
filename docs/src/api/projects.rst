@@ -37,8 +37,26 @@ Shows a project based on its ID.
 
 Endpoint
 ~~~~~~~~
-GET /projects/{id}
+GET /projects/{id}/
 
 Returns
 ~~~~~~~
 Returns the project.
+
+Update Project
+--------------
+
+Endpoint
+~~~~~~~~
+PUT /projects/{id}/
+
+Parameters
+~~~~~~~~~~
+
+* **title** the new title of the project.
+* **description** the new description of the project.
+* **type** the new type of the project: "back-end", "front-end", "IOS" or "Android".
+
+Returns
+~~~~~~~
+Returns the updated version of the project.

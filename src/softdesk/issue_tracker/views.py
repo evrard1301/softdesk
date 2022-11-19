@@ -24,6 +24,10 @@ class ProjectViewSet(viewsets.ViewSet):
             'retrieve': [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectContributor()
+            ],
+            'update': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectOwner()
             ]
         }
 
@@ -76,3 +80,14 @@ class ProjectViewSet(viewsets.ViewSet):
         data = serializers.ProjectSerializer(obj).data
         
         return Response(data)
+
+    def update(self, request, pk):
+        project = get_object_or_404(models.Project, pk=pk)
+        self.check_object_permissions(request, project)
+        
+        project.title = request.POST.get('title')
+        project.description = request.POST.get('description')
+        project.type = request.POST.get('type')        
+        project.save()
+        
+        return Response(serializers.ProjectSerializer(project).data)

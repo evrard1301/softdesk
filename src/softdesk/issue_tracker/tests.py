@@ -10,6 +10,8 @@ class ProjectTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='alice',
                                              password='alice-password')
+        self.bob = User.objects.create_user(username='bob',
+                                            password='bob-password')
         self.client = APIClient()
         
     def test_ok_create(self):        
@@ -48,11 +50,11 @@ class ProjectTest(TestCase):
 
     def test_ok_list__owner(self):
         self.client.force_authenticate(self.user)
-        bob = User.objects.create_user(username='bob', password='azerty')
+
         models.Project.create_project(self.user, 'hello')
         models.Project.create_project(self.user, 'I love')
         models.Project.create_project(self.user, 'pizza')
-        models.Project.create_project(bob, 'so much')
+        models.Project.create_project(self.bob, 'so much')
         
         response = self.client.get(reverse_lazy('issue_tracker:projects-list'))
 
@@ -68,8 +70,7 @@ class ProjectTest(TestCase):
 
     def test_err_list__not_contributor(self):
         self.client.force_authenticate(self.user)
-        bob = User.objects.create_user(username='bob', password='azerty')
-        models.Project.create_project(bob, 'hello')
+        models.Project.create_project(self.bob, 'hello')
 
         response = self.client.get(reverse_lazy('issue_tracker:projects-list'))
         self.assertEqual(0, len(response.data))
@@ -87,8 +88,7 @@ class ProjectTest(TestCase):
 
     def test_ok_show__not_the_owner(self):
         self.client.force_authenticate(self.user)
-        bob = User.objects.create_user(username='bob', password='azerty')
-        project = models.Project.create_project(bob, 'turing')
+        project = models.Project.create_project(self.bob, 'turing')
 
         models.Contributor.objects.create(
             user=self.user,
@@ -105,8 +105,7 @@ class ProjectTest(TestCase):
     
     def test_err_show__not_a_contributor(self):
         self.client.force_authenticate(self.user)
-        bob = User.objects.create_user(username='bob', password='azerty')
-        project = models.Project.create_project(bob, 'alan')
+        project = models.Project.create_project(self.bob, 'alan')
 
         response = self.client.get(reverse_lazy('issue_tracker:projects-detail',
                                                 args=[project.id]))
@@ -119,3 +118,54 @@ class ProjectTest(TestCase):
                                                 args=[project.id]))
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
 
+    def test_ok_update(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(
+            self.user,
+            'my title',
+            'my desc',
+            models.Project.ANDROID
+        )
+
+        response = self.client.put(
+            reverse_lazy('issue_tracker:projects-detail',
+                         args=[project.id]), {
+                             'title': 'new title',
+                             'description': 'new description',
+                             'type': models.Project.IOS
+                         }
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        new_project = models.Project.objects.filter(pk=project.id).first()
+        self.assertEqual('new title', new_project.title)
+        self.assertEqual('new description', new_project.description)
+        self.assertEqual(models.Project.IOS, new_project.type)
+
+    def test_err_update__not_owner_but_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(
+            self.bob,
+            'my title',
+            'my desc',
+            models.Project.ANDROID
+        )
+
+        models.Contributor.objects.create(user=self.user, project=project)
+        
+        response = self.client.put(
+            reverse_lazy('issue_tracker:projects-detail',
+                         args=[project.id]), {
+                             'title': 'new title',
+                             'description': 'new description',
+                             'type': models.Project.IOS
+                         }
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        old_project = models.Project.objects.filter(pk=project.id).first()
+        self.assertEqual('my title', old_project.title)
+        self.assertEqual('my desc', old_project.description)
+        self.assertEqual(models.Project.ANDROID, old_project.type)
