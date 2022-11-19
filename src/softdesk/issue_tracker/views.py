@@ -101,3 +101,36 @@ class ProjectViewSet(viewsets.ViewSet):
         self.check_object_permissions(request, project)
         project.delete()
         return Response({})
+
+
+class ContributorViewSet(viewsets.ViewSet):
+    def get_permissions(self):
+        perms = {
+            'create': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectOwner()
+            ]
+        }
+        
+        if self.action not in perms.keys():
+            raise Exception(f'unknown action "{self.action}"')
+        
+        return perms.get(self.action)
+
+    def create(self, request, project_pk):
+        project = get_object_or_404(models.Project, pk=project_pk)
+        
+        user = get_object_or_404(
+            auth_models.User,
+            pk=request.POST.get('user_id')
+        )
+
+        self.check_object_permissions(request, project)
+
+        models.Contributor.objects.create(
+            user=user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+        
+        return Response()

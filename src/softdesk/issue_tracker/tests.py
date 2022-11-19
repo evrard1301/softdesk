@@ -197,3 +197,50 @@ class ProjectTest(TestCase):
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
         self.assertEqual(1, models.Project.objects.count())
+
+
+class ContributorTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='alice',
+                                             password='alice-password')
+        self.bob = User.objects.create_user(username='bob',
+                                            password='bob-password')
+        self.client = APIClient()
+        
+    def test_ok_add_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.user, 'project')
+
+        self.assertEqual(
+            0,
+            models.Contributor.objects.filter(user=self.bob,
+                                              project=project).count()
+        )
+        
+        response = self.client.post(reverse_lazy(
+            'issue_tracker:contributors-list',
+            args=[project.id]), {
+                'user_id': self.bob.id
+        })
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        self.assertEqual(
+            1,
+            models.Contributor.objects.filter(user=self.bob,
+                                              project=project).count()
+        )
+
+    def test_err_add_contributor__not_owner(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'project')
+        
+        response = self.client.post(reverse_lazy(
+            'issue_tracker:contributors-list',
+            args=[project.id]), {
+                'user_id': self.user.id
+        })
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
