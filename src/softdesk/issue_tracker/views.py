@@ -12,14 +12,24 @@ from . import permissions
 
 
 class ProjectViewSet(viewsets.ViewSet):
-
+    
     def get_permissions(self):
         perms = {
             'create': [
                 rest_permissions.IsAuthenticated()
+            ],
+            'list': [
+                rest_permissions.IsAuthenticated()
+            ],
+            'retrieve': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectContributor()
             ]
         }
 
+        if self.action not in perms.keys():
+            raise Exception(f'unknown action "{self.action}"')
+        
         return perms.get(self.action)
         
     def create(self, request):
@@ -27,18 +37,22 @@ class ProjectViewSet(viewsets.ViewSet):
         description = request.POST.get('description')
         type = request.POST.get('type')
 
-        project = models.Project(title=title,
-                                 description=description,
-                                 type=type)
+        project = models.Project(
+            title=title,
+            description=description,
+            type=type
+        )
 
         try:
             project.full_clean()
         
             project.save()
 
-            models.Contributor.objects.create(project=project,
-                                              user=request.user,
-                                              role=models.Contributor.ROLE_OWNER)
+            models.Contributor.objects.create(
+                project=project,
+                user=request.user,
+                role=models.Contributor.ROLE_OWNER
+            )
 
             ser = serializers.ProjectSerializer(project)
             
@@ -47,4 +61,18 @@ class ProjectViewSet(viewsets.ViewSet):
         except ValidationError:
             return Response(data={}, status=status.HTTP_400_BAD_REQUEST)
 
+    def list(self, request):
+        projects = [
+            c.project
+            for c
+            in models.Contributor.objects.filter(user=request.user)
+        ]
+        data = serializers.ProjectSerializer(projects, many=True).data
+        return Response(data)
+
+    def retrieve(self, request, pk):
+        obj = models.Project.objects.filter(id=pk).first()
+        self.check_object_permissions(request, obj)
+        data = serializers.ProjectSerializer(obj).data
         
+        return Response(data)

@@ -18,3 +18,27 @@ Parameters
 Returns
 ~~~~~~~
 Returns the brand new project.
+
+List Projects
+-------------
+Gives all the projects where the authentified user is a contributor.
+
+Endpoint
+~~~~~~~~
+GET /projects/
+
+Returns
+~~~~~~~
+Returns a list of projects.
+
+Show Project
+------------
+Shows a project based on its ID.
+
+Endpoint
+~~~~~~~~
+GET /projects/{id}
+
+Returns
+~~~~~~~
+Returns the project.
