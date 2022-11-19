@@ -244,3 +244,81 @@ class ContributorTest(TestCase):
         })
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ok_list_contributors(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.user, 'proj 0')
+
+        models.Contributor.objects.create(
+            user=User.objects.create_user(username='claire', password='nop'),
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        models.Contributor.objects.create(
+            user=User.objects.create_user(username='dan', password='nop'),
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        models.Contributor.objects.create(
+            user=User.objects.create_user(username='edward', password='nop'),
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        response = self.client.get(
+            reverse_lazy('issue_tracker:contributors-list', args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(4, len(response.data))
+        self.assertEqual('alice', response.data[0]['username'])
+        self.assertEqual('claire', response.data[1]['username'])
+        self.assertEqual('dan', response.data[2]['username'])
+        self.assertEqual('edward', response.data[3]['username'])
+
+    def test_ok_list_contributors__contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'proj 0')
+
+        models.Contributor.objects.create(
+            user=User.objects.create_user(username='claire', password='nop'),
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        response = self.client.get(
+            reverse_lazy('issue_tracker:contributors-list', args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(3, len(response.data))
+        self.assertEqual('bob', response.data[0]['username'])
+        self.assertEqual('claire', response.data[1]['username'])
+        self.assertEqual('alice', response.data[2]['username'])
+
+    def test_err_list_contributors__not_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'proj 0')
+
+        models.Contributor.objects.create(
+            user=User.objects.create_user(username='claire', password='nop'),
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        response = self.client.get(
+            reverse_lazy('issue_tracker:contributors-list', args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)

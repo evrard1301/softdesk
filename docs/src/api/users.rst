@@ -15,3 +15,18 @@ Parameters
 ~~~~~~~~~~
 
 * **user_id** the ID of the user to add as contributor.
+
+List Contributors
+-----------------
+
+Lists all the contributors of a project.
+
+Endpoint
+~~~~~~~~
+
+GET /projects/{id}/users/
+
+Returns
+~~~~~~~
+
+All the contributors of the given project.

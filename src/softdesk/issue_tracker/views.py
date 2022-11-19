@@ -109,7 +109,13 @@ class ContributorViewSet(viewsets.ViewSet):
             'create': [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectOwner()
+            ],
+
+            'list': [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectContributor()
             ]
+
         }
         
         if self.action not in perms.keys():
@@ -134,3 +140,16 @@ class ContributorViewSet(viewsets.ViewSet):
         )
         
         return Response()
+
+    def list(self, request, project_pk):
+        project = get_object_or_404(models.Project, pk=project_pk)
+        self.check_object_permissions(request, project)
+        
+        users = [
+            contributor.user for contributor
+            in models.Contributor.objects.filter(project=project).all()
+        ]
+
+        data = auth_serializers.UserSerializer(users, many=True).data
+
+        return Response(data)
