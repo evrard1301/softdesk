@@ -1,9 +1,9 @@
 Problems
 ========
 
-Create Problem
---------------
-Creates a n new project issue.
+Create Issues
+-------------
+Creates a new project issue.
 
 Endpoint
 ~~~~~~~~
@@ -23,3 +23,15 @@ Parameters
 Returns
 ~~~~~~~
 Returns the created issue.
+
+List Issues
+-----------
+Gives the list of all  the issues of a given project.
+
+Endpoint
+~~~~~~~~
+GET /projects/{id}/issues/
+
+Returns
+~~~~~~~
+Returns the list of all the issues.

@@ -180,11 +180,13 @@ class IssueViewSet(viewsets.ModelViewSet):
     queryset = models.Issue.objects.all()
 
     def get_permissions(self):
-        perms = [
-            rest_permissions.IsAuthenticated(),
+        default_perms = [
+            rest_permissions.IsAuthenticated()
         ]
         
-        if self.action == 'create':
-            perms.append(permissions.IsProjectContributor())
+        if self.action == 'create' or self.action == 'list':
+            default_perms.append(permissions.IsProjectContributor())
+        else:
+            default_perms.append(permissions.IsProjectOwner())
             
-        return perms
+        return default_perms

@@ -528,3 +528,85 @@ class IssueTest(TestCase):
             })
 
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_ok_list_issue(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.user, 'my project')
+
+        for i in range(0, 3):
+            models.Issue.objects.create(
+                title=f'title {i}',
+                project=project,
+                desc='desc',
+                tag='tag',
+                priority='prio',
+                status=models.Issue.STATUS_OPENED,
+                author=self.bob,
+                assignee=self.user
+            )
+
+        models.Contributor.objects.create(
+            user=self.bob,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+        
+        response = self.client.get(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(3, len(response.data))
+
+    def test_ok_list_issue__contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'my project')
+
+        for i in range(0, 3):
+            models.Issue.objects.create(
+                title=f'title {i}',
+                project=project,
+                desc='desc',
+                tag='tag',
+                priority='prio',
+                status=models.Issue.STATUS_OPENED,
+                author=self.bob,
+                assignee=self.user
+            )
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+        
+        response = self.client.get(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+    def test_err_list_issue__not_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'my project')
+
+        for i in range(0, 3):
+            models.Issue.objects.create(
+                title=f'title {i}',
+                project=project,
+                desc='desc',
+                tag='tag',
+                priority='prio',
+                status=models.Issue.STATUS_OPENED,
+                author=self.bob,
+                assignee=self.user
+            )
+
+        response = self.client.get(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id])
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
