@@ -183,8 +183,10 @@ class IssueViewSet(viewsets.ModelViewSet):
         default_perms = [
             rest_permissions.IsAuthenticated()
         ]
-        
-        if self.action == 'create' or self.action == 'list':
+
+        if self.action == 'update':
+            default_perms.append(permissions.IsIssueOwner())
+        elif self.action == 'create' or self.action == 'list':
             default_perms.append(permissions.IsProjectContributor())
         else:
             default_perms.append(permissions.IsProjectOwner())

@@ -610,3 +610,130 @@ class IssueTest(TestCase):
         )
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ok_update_issue__as_owner(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.user, 'my project')
+        
+        models.Contributor.objects.create(
+            user=self.bob,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+        
+        issue = models.Issue.objects.create(
+            title='my project',
+            project=project,
+            desc='desc',
+            tag='tag',
+            priority='prio',
+            status=models.Issue.STATUS_OPENED,
+            author=self.user,
+            assignee=self.bob
+        )
+        
+        response = self.client.put(
+            reverse_lazy(
+                'issue_tracker:issues-detail',
+                args=[project.id, issue.id]), {
+                    'title': 'my updated project',
+                    'project': project.id,
+                    'desc': 'desc 2',
+                    'tag': 'tag 2',
+                    'priority': 'prio 2',
+                    'status': models.Issue.STATUS_CLOSED,
+                    'author': self.bob.id,
+                    'assignee': self.user.id
+            })
+            
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        issue = models.Issue.objects.filter(id=issue.id)[0]
+        self.assertEqual('my updated project', issue.title)
+        self.assertEqual(project.id, issue.project.id)
+        self.assertEqual('desc 2', issue.desc)
+        self.assertEqual('tag 2', issue.tag)
+        self.assertEqual('prio 2', issue.priority)
+        self.assertEqual(models.Issue.STATUS_CLOSED, issue.status)
+        self.assertEqual(self.bob.id, issue.author.id)
+        self.assertEqual(self.user.id, issue.assignee.id)
+
+    def test_ok_update_issue__as_issue_author(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'my project')
+        issue = models.Issue.objects.create(
+            title='my project',
+            project=project,
+            desc='desc',
+            tag='tag',
+            priority='prio',
+            status=models.Issue.STATUS_OPENED,
+            author=self.user,
+            assignee=self.bob
+        )
+        
+        response = self.client.put(
+            reverse_lazy(
+                'issue_tracker:issues-detail',
+                args=[project.id, issue.id]), {
+                    'title': 'my updated project',
+                    'project': project.id,
+                    'desc': 'desc 2',
+                    'tag': 'tag 2',
+                    'priority': 'prio 2',
+                    'status': models.Issue.STATUS_CLOSED,
+                    'author': self.bob.id,
+                    'assignee': self.user.id
+            })
+            
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+        issue = models.Issue.objects.filter(id=issue.id)[0]
+        self.assertEqual('my updated project', issue.title)
+        self.assertEqual(project.id, issue.project.id)
+        self.assertEqual('desc 2', issue.desc)
+        self.assertEqual('tag 2', issue.tag)
+        self.assertEqual('prio 2', issue.priority)
+        self.assertEqual(models.Issue.STATUS_CLOSED, issue.status)
+        self.assertEqual(self.bob.id, issue.author.id)
+        self.assertEqual(self.user.id, issue.assignee.id)
+
+    def test_err_update_issue__not_owner_only_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'my project')
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+
+        issue = models.Issue.objects.create(
+            title='my project',
+            project=project,
+            desc='desc',
+            tag='tag',
+            priority='prio',
+            status=models.Issue.STATUS_OPENED,
+            author=self.bob,
+            assignee=self.user
+        )
+        
+        response = self.client.put(
+            reverse_lazy(
+                'issue_tracker:issues-detail',
+                args=[project.id, issue.id]), {
+                    'title': 'my updated project',
+                    'project': project.id,
+                    'desc': 'desc 2',
+                    'tag': 'tag 2',
+                    'priority': 'prio 2',
+                    'status': models.Issue.STATUS_CLOSED,
+                    'author': self.bob.id,
+                    'assignee': self.user.id
+            })
+            
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
