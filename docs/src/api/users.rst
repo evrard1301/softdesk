@@ -16,6 +16,11 @@ Parameters
 
 * **user_id** the ID of the user to add as contributor.
 
+Returns
+~~~~~~~
+
+Returns the new contributor.
+
 List Contributors
 -----------------
 

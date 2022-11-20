@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import User
+from .serializers import UserSerializer
 
 
 class SignupView(APIView):
@@ -18,7 +19,8 @@ class SignupView(APIView):
             )
             user.full_clean()
             user.save()
-            return Response({'status': 'ok'})
+            data = UserSerializer(user).data
+            return Response(data)
 
         except Exception:
             return Response({'status': 'err'}, status=401)

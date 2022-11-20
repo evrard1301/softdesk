@@ -351,6 +351,8 @@ class ContributorTest(TestCase):
             )
         )
 
+        self.assertEqual(1, User.objects.filter(pk=self.bob.id).count())
+        
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         self.assertEqual(
             0,

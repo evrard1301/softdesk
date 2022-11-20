@@ -17,6 +17,11 @@ Parameters
 * **password** the new account password.
 * **email** the new account email address.
 
+Returns
+~~~~~~~
+
+Returns the new user.
+
 Log In
 ------
 Allows a registrated user to log in.

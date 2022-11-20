@@ -141,8 +141,10 @@ class ContributorViewSet(viewsets.ViewSet):
             project=project,
             role=models.Contributor.ROLE_TEAMMATE
         )
+
+        data = auth_serializers.UserSerializer(user).data
         
-        return Response()
+        return Response(data)
 
     def list(self, request, project_pk):
         project = get_object_or_404(models.Project, pk=project_pk)
@@ -168,7 +170,7 @@ class ContributorViewSet(viewsets.ViewSet):
         data = auth_serializers.UserSerializer(user).data
         
         if len(res) == 1:
-            user.delete()
+            res[0].delete()
         
         return Response(data)
         
