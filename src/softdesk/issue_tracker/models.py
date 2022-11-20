@@ -45,3 +45,30 @@ class Contributor(models.Model):
                             choices=CONTRIBUTOR_ROLES,
                             default=ROLE_TEAMMATE)
     
+
+class Issue(models.Model):
+    STATUS_OPENED = 'OPENED'
+    STATUS_CLOSED = 'CLOSED'
+
+    ISSUE_STATUS = [
+        (STATUS_OPENED, 'opened'),
+        (STATUS_CLOSED, 'closed')
+    ]
+    
+    title = models.CharField(max_length=128)
+    desc = models.CharField(max_length=512)
+    tag = models.CharField(max_length=128)
+    priority = models.CharField(max_length=128)
+    status = models.CharField(max_length=128, choices=ISSUE_STATUS)
+    project = models.ForeignKey(Project, models.CASCADE)
+    author = models.ForeignKey(
+        auth_models.User,
+        models.CASCADE,
+        related_name='author_user'
+    )
+    assignee = models.ForeignKey(
+        auth_models.User,
+        models.CASCADE,
+        related_name='assignee_user'
+    )
+    

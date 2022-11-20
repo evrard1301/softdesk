@@ -23,15 +23,15 @@ class ProjectViewSet(viewsets.ViewSet):
             ],
             'retrieve': [
                 rest_permissions.IsAuthenticated(),
-                permissions.IsProjectContributor()
+                permissions.IsProjectContributorObj()
             ],
             'update': [
                 rest_permissions.IsAuthenticated(),
-                permissions.IsProjectOwner()
+                permissions.IsProjectOwnerObj()
             ],
             'destroy': [
                 rest_permissions.IsAuthenticated(),
-                permissions.IsProjectOwner()
+                permissions.IsProjectOwnerObj()
             ]
         }
 
@@ -108,15 +108,15 @@ class ContributorViewSet(viewsets.ViewSet):
         perms = {
             'create': [
                 rest_permissions.IsAuthenticated(),
-                permissions.IsProjectOwner()
+                permissions.IsProjectOwnerObj()
             ],
             'destroy': [
                 rest_permissions.IsAuthenticated(),
-                permissions.IsProjectOwner()
+                permissions.IsProjectOwnerObj()
             ],
             'list': [
                 rest_permissions.IsAuthenticated(),
-                permissions.IsProjectContributor()
+                permissions.IsProjectContributorObj()
             ]
 
         }
@@ -174,3 +174,17 @@ class ContributorViewSet(viewsets.ViewSet):
         
         return Response(data)
         
+
+class IssueViewSet(viewsets.ModelViewSet):    
+    serializer_class = serializers.IssueSerializer
+    queryset = models.Issue.objects.all()
+
+    def get_permissions(self):
+        perms = [
+            rest_permissions.IsAuthenticated(),
+        ]
+        
+        if self.action == 'create':
+            perms.append(permissions.IsProjectContributor())
+            
+        return perms

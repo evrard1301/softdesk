@@ -411,3 +411,120 @@ class ContributorTest(TestCase):
         )
 
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+
+class IssueTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='alice',
+                                             password='alice-password')
+        self.bob = User.objects.create_user(username='bob',
+                                            password='bob-password')
+        self.client = APIClient()
+        
+    def test_ok_create_issue(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.user, 'my project')
+
+        self.assertEqual(0, models.Issue.objects.count())
+        
+        response = self.client.post(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id]), {
+                'title': 'problem everywhere',
+                'desc': 'problems with authentication',
+                'tag': 'bug',
+                'priority': '2',
+                'status': 'OPENED',
+                'project': project.id,
+                'author': self.user.id,
+                'assignee': self.bob.id
+            })
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(1, models.Issue.objects.count())
+        issue = models.Issue.objects.all()[0]
+        self.assertEqual('problem everywhere', issue.title)
+        self.assertEqual('problems with authentication', issue.desc)
+        self.assertEqual('bug', issue.tag)
+        self.assertEqual('2', issue.priority)
+        self.assertEqual('OPENED', issue.status)
+        self.assertEqual(project, issue.project)
+        self.assertEqual(self.user, issue.author)
+        self.assertEqual(self.bob, issue.assignee)
+
+    def test_ok_create_issue__not_owner(self):
+        self.client.force_authenticate(self.user)
+
+        project = models.Project.create_project(self.bob, 'my project')
+        models.Contributor.objects.create(
+            user=self.user,
+            project=project,
+            role=models.Contributor.ROLE_TEAMMATE
+        )
+        
+        self.assertEqual(0, models.Issue.objects.count())
+        
+        response = self.client.post(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id]), {
+                'title': 'problem everywhere',
+                'desc': 'problems with authentication',
+                'tag': 'bug',
+                'priority': '2',
+                'status': 'OPENED',
+                'project': project.id,
+                'author': self.user.id,
+                'assignee': self.bob.id
+            })
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(1, models.Issue.objects.count())
+        issue = models.Issue.objects.all()[0]
+        self.assertEqual('problem everywhere', issue.title)
+        self.assertEqual('problems with authentication', issue.desc)
+        self.assertEqual('bug', issue.tag)
+        self.assertEqual('2', issue.priority)
+        self.assertEqual('OPENED', issue.status)
+        self.assertEqual(project, issue.project)
+        self.assertEqual(self.user, issue.author)
+        self.assertEqual(self.bob, issue.assignee)
+
+    def test_err_create_issue__not_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        claire = User.objects.create_user(username='claire', password='aze')
+        project = models.Project.create_project(claire, 'my project')
+
+        self.assertEqual(0, models.Issue.objects.count())
+        
+        response = self.client.post(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id]), {
+                'title': 'problem everywhere',
+                'desc': 'problems with authentication',
+                'tag': 'bug',
+                'priority': '2',
+                'status': 'OPENED',
+                'project': project.id,
+                'author': self.user.id,
+                'assignee': self.bob.id
+            })
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_err_create_issue_not_authenticated(self):
+        project = models.Project.create_project(self.user, 'my project')
+
+        self.assertEqual(0, models.Issue.objects.count())
+        
+        response = self.client.post(
+            reverse_lazy('issue_tracker:issues-list', args=[project.id]), {
+                'title': 'problem everywhere',
+                'desc': 'problems with authentication',
+                'tag': 'bug',
+                'priority': '2',
+                'status': 'OPENED',
+                'project': project.id,
+                'author': self.user.id,
+                'assignee': self.bob.id
+            })
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)

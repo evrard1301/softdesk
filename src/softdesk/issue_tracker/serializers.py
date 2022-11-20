@@ -17,3 +17,19 @@ class ContributorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Contributor
         fields = ['project_id']
+
+
+class IssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Issue
+        fields = [
+            'id',
+            'title',
+            'desc',
+            'tag',
+            'priority',
+            'status',
+            'project',
+            'author',
+            'assignee'
+        ]
