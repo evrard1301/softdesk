@@ -1,8 +1,11 @@
 from django.urls import path
+from rest_framework_simplejwt.views import TokenObtainPairView
 from . import views
 
 app_name = 'authentication'
 
 urlpatterns = [
-    path('signup/', views.LoginView.as_view(), name='signup')
+    path('signup/', views.LoginView.as_view(), name='signup'),
+    path('login/', TokenObtainPairView.as_view(), name='login')
+    
 ]

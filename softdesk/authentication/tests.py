@@ -51,3 +51,35 @@ class CreateUserTest(TestCase):
 
         self.assertNotEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(0, User.objects.count())
+
+        
+class LoginTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='alice',
+                                             password='coucou')
+        
+    def test_ok(self):
+        response = self.client.post(reverse_lazy('authentication:login'), {
+            'username': 'alice',
+            'password': 'coucou'
+        })
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertNotEqual(0, len(response.data))
+
+    def test_err_wrong_username(self):
+        response = self.client.post(reverse_lazy('authentication:login'), {
+            'username': 'alicia',
+            'password': 'coucou'
+        })
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_err_wrong_password(self):
+        response = self.client.post(reverse_lazy('authentication:login'), {
+            'username': 'alice',
+            'password': 'salut'
+        })
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
