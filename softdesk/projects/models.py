@@ -21,17 +21,16 @@ class Project(models.Model):
 
 
 class Contributor(models.Model):
-    OWNER_ROLE = 'OWNER'
+    SUPERVISOR_ROLE = 'SUPERVISOR'
     CONTRIBUTOR_ROLE = 'CONTRIBUTOR'
-    CREATOR_ROLE = 'CREATOR'
+    AUTHOR_ROLE = 'AUTHOR'
     
     ROLES = [
-        (OWNER_ROLE, 'owner'),
+        (SUPERVISOR_ROLE, 'supervisor'),
         (CONTRIBUTOR_ROLE, 'contributor'),
-        (CREATOR_ROLE, 'creator')
+        (AUTHOR_ROLE, 'author')
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    permission = models.CharField(max_length=256)
     role = models.CharField(max_length=256, choices=ROLES)
