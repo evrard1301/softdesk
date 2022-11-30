@@ -20,7 +20,7 @@ class ProjectView(mixins.CreateModelMixin,
     def get_queryset(self):
         if self.action == 'list':
             user = self.request.user
-            contribs = models.Contributor.objects.filter(user=user)
+            contribs = models.Collaborator.objects.filter(user=user)
             return [contrib.project for contrib in contribs]
 
         return models.Project.objects.all()
@@ -43,16 +43,16 @@ class ProjectView(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         project = serializer.save()
-        models.Contributor.objects.create(user=self.request.user,
+        models.Collaborator.objects.create(user=self.request.user,
                                           project=project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
 
 class UserView(mixins.CreateModelMixin,
                mixins.DestroyModelMixin,
                mixins.ListModelMixin,
                viewsets.GenericViewSet):
-    serializer_class = serializers.ContributorSerializer
+    serializer_class = serializers.CollaboratorSerializer
 
     def get_permissions(self):
         if self.action in ['list']:
@@ -67,7 +67,7 @@ class UserView(mixins.CreateModelMixin,
         ]
 
     def get_queryset(self):
-        return models.Contributor.objects.all()
+        return models.Collaborator.objects.all()
 
     def create(self, request, *args, **kwargs):
         self.check_permissions(request)
@@ -75,7 +75,7 @@ class UserView(mixins.CreateModelMixin,
         user = request.user
         role = request.POST.get('role')
 
-        contrib = models.Contributor(project=project,
+        contrib = models.Collaborator(project=project,
                                      user=user,
                                      role=role)
         try:
@@ -95,8 +95,8 @@ class UserView(mixins.CreateModelMixin,
 
         user = get_object_or_404(User, pk=pk)
 
-        contrib = models.Contributor.objects.get(project=project,
-                                                 user=user)
+        contrib = models.Collaborator.objects.get(project=project,
+                                                  user=user)
         contrib.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

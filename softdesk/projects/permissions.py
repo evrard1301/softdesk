@@ -15,18 +15,18 @@ class IsProjectAuthor(BasePermission):
         user = request.user
         project = get_project(view)
         
-        role = models.Contributor.AUTHOR_ROLE
-        return models.Contributor.objects.filter(user=user,
-                                                 project=project,
-                                                 role=role).count() > 0
+        role = models.Collaborator.AUTHOR_ROLE
+        return models.Collaborator.objects.filter(user=user,
+                                                  project=project,
+                                                  role=role).count() > 0
 
 
 class IsProjectRelated(BasePermission):
     def has_permission(self, request, view):        
         user = request.user
         project = get_project(view)
-        return models.Contributor.objects.filter(user=user,
-                                                 project=project).count() > 0
+        return models.Collaborator.objects.filter(user=user,
+                                                  project=project).count() > 0
 
 
 class IsIssueAuthor(BasePermission):

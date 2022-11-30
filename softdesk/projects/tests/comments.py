@@ -50,10 +50,10 @@ class CreateCommentTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.post(
@@ -94,10 +94,10 @@ class CreateCommentTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_authentificated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.post(
@@ -172,10 +172,10 @@ class UpdateCommentTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.put(
@@ -220,10 +220,10 @@ class UpdateCommentTest(TestCase):
     def test_err_not_author(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.put(
@@ -243,10 +243,10 @@ class UpdateCommentTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_authentificated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.put(
@@ -322,10 +322,10 @@ class DestroyCommentTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.delete(
@@ -346,10 +346,10 @@ class DestroyCommentTest(TestCase):
     def test_err_not_author(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.delete(
@@ -364,10 +364,10 @@ class DestroyCommentTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_authentificated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.delete(
@@ -441,10 +441,10 @@ class ListCommentsTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.get(
@@ -470,10 +470,10 @@ class ListCommentsTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_authenticated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.get(
@@ -528,10 +528,10 @@ class RetrieveCommentTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.get(
@@ -559,10 +559,10 @@ class RetrieveCommentTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
     
     def test_err_not_authenticated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.get(

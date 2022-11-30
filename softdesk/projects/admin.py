@@ -3,5 +3,5 @@ from . import models
 
 
 admin.site.register(models.Project)
-admin.site.register(models.Contributor)
+admin.site.register(models.Collaborator)
 

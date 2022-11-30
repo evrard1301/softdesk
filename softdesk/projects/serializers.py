@@ -14,9 +14,9 @@ class ProjectSerializer(ModelSerializer):
         ]
 
 
-class ContributorSerializer(serializers.ModelSerializer):
+class CollaboratorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Contributor
+        model = models.Collaborator
         fields = [
             'user',
             'project',

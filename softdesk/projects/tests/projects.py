@@ -26,10 +26,10 @@ class CreateProjectTest(TestCase):
         self.assertEqual('this is my project', project.description)
         self.assertEqual(models.Project.ANDROID_TYPE, project.type)
 
-        contribs = models.Contributor.objects.filter(user=self.user,
+        contribs = models.Collaborator.objects.filter(user=self.user,
                                                      project=project)
         self.assertEqual(1, contribs.count())
-        self.assertEqual(models.Contributor.AUTHOR_ROLE, contribs[0].role)
+        self.assertEqual(models.Collaborator.AUTHOR_ROLE, contribs[0].role)
 
     def test_err_not_authenticated(self):
         response = self.client.post(reverse_lazy('projects:projects-list'), {
@@ -53,9 +53,9 @@ class UpdateProjectTest(TestCase):
     def test_ok(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
         response = self.client.put(
             reverse_lazy('projects:projects-detail', args=[self.project.id]), {
                 'title': 'My updated project',
@@ -94,9 +94,9 @@ class UpdateProjectTest(TestCase):
     def test_err_not_author_but_supervisor(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.
+                                          role=models.Collaborator.
                                           SUPERVISOR_ROLE)
 
         response = self.client.put(
@@ -121,9 +121,9 @@ class DestroyProjectTest(TestCase):
     def test_ok(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
         response = self.client.delete(
             reverse_lazy('projects:projects-detail', args=[self.project.id])
         )
@@ -136,9 +136,9 @@ class DestroyProjectTest(TestCase):
         )
 
     def test_err_not_authenticated(self):
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
         response = self.client.delete(
             reverse_lazy('projects:projects-detail', args=[self.project.id])
         )
@@ -157,9 +157,9 @@ class DestroyProjectTest(TestCase):
     def test_err_not_author_but_supervisor(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.SUPERVISOR_ROLE)
+                                          role=models.Collaborator.SUPERVISOR_ROLE)
         response = self.client.delete(
             reverse_lazy('projects:projects-detail', args=[self.project.id])
         )
@@ -186,22 +186,22 @@ class ListProjectsTest(TestCase):
     def test_ok_related_to_all_projects(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.projects[0],
-            role=models.Contributor.AUTHOR_ROLE
+            role=models.Collaborator.AUTHOR_ROLE
         )
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.projects[1],
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.projects[2],
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = self.client.get(
@@ -214,10 +214,10 @@ class ListProjectsTest(TestCase):
     def test_ok_related_to_one_project(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.projects[1],
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = self.client.get(
@@ -265,10 +265,10 @@ class RetrieveProjectTest(TestCase):
     def test_ok_related_to_the_project(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.projects[2],
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = self.client.get(
@@ -294,5 +294,3 @@ class RetrieveProjectTest(TestCase):
         )
 
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
-
-

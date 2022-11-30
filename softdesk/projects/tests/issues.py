@@ -28,10 +28,10 @@ class CreateIssueTest(TestCase):
     def test_ok_as_author(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.AUTHOR_ROLE
+            role=models.Collaborator.AUTHOR_ROLE
         )
 
         response = \
@@ -60,13 +60,13 @@ class CreateIssueTest(TestCase):
         self.assertEqual(self.user.id, issue.author.id)
         self.assertEqual(self.assignee.id, issue.assignee.id)
 
-    def test_ok_as_contributor(self):
+    def test_ok_as_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = \
@@ -105,10 +105,10 @@ class CreateIssueTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_autenticated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = \
@@ -172,10 +172,10 @@ class UpdateIssueTest(TestCase):
     def test_ok_as_author(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.AUTHOR_ROLE
+            role=models.Collaborator.AUTHOR_ROLE
         )
 
         response = \
@@ -204,13 +204,13 @@ class UpdateIssueTest(TestCase):
         self.assertEqual(self.user.id, issue.assignee.id)
         self.assertEqual(self.assignee.id, issue.author.id)
 
-    def test_err_as_contributor(self):
+    def test_err_as_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = \
@@ -251,10 +251,10 @@ class UpdateIssueTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_autenticated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.AUTHOR_ROLE
+            role=models.Collaborator.AUTHOR_ROLE
         )
 
         response = \
@@ -399,10 +399,10 @@ class ListIssuesTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = self.client.get(reverse_lazy(
@@ -424,10 +424,10 @@ class ListIssuesTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_err_not_authenticated(self):
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
         response = self.client.get(reverse_lazy(

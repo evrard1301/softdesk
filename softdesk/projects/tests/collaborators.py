@@ -20,24 +20,24 @@ class CreateCollaboratorTest(TestCase):
     def test_ok(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
-        num_contrib = models.Contributor.objects.filter(user=self.user).count()
+        num_contrib = models.Collaborator.objects.filter(user=self.user).count()
 
         response = self.client.post(
             reverse_lazy('projects:users-list', kwargs={'project_pk':
                                                         self.project.id}), {
                 'user': self.user.id,
-                'role': models.Contributor.SUPERVISOR_ROLE
+                'role': models.Collaborator.SUPERVISOR_ROLE
             }
         )
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(
             num_contrib + 1,
-            models.Contributor.objects.filter(user=self.user).count()
+            models.Collaborator.objects.filter(user=self.user).count()
         )
 
     def test_ko_not_project_author(self):
@@ -47,7 +47,7 @@ class CreateCollaboratorTest(TestCase):
             reverse_lazy('projects:users-list', kwargs={'project_pk':
                                                         self.project.id}), {
                 'user': self.user.id,
-                'role': models.Contributor.SUPERVISOR_ROLE
+                'role': models.Collaborator.SUPERVISOR_ROLE
             }
         )
 
@@ -56,17 +56,17 @@ class CreateCollaboratorTest(TestCase):
     def test_ko_not_project_author_but_supervisor(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.post(
             reverse_lazy('projects:users-list', kwargs={'project_pk':
                                                         self.project.id}), {
                 'user': self.user.id,
-                'role': models.Contributor.SUPERVISOR_ROLE
+                'role': models.Collaborator.SUPERVISOR_ROLE
             }
         )
 
@@ -74,15 +74,15 @@ class CreateCollaboratorTest(TestCase):
 
     def test_ko_not_authenticated(self):
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.post(
             reverse_lazy('projects:users-list', kwargs={'project_pk':
                                                         self.project.id}), {
                 'user': self.user.id,
-                'role': models.Contributor.SUPERVISOR_ROLE
+                'role': models.Collaborator.SUPERVISOR_ROLE
             }
         )
 
@@ -104,18 +104,18 @@ class DestroyCollaboratorTest(TestCase):
             type=models.Project.BACKEND_TYPE
         )
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.collaborator,
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
     def test_ok(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.delete(
             reverse_lazy('projects:users-detail',
@@ -126,7 +126,7 @@ class DestroyCollaboratorTest(TestCase):
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
         self.assertEqual(
             0,
-            models.Contributor.objects.filter(user=self.collaborator).count()
+            models.Collaborator.objects.filter(user=self.collaborator).count()
         )
 
     def test_ko_not_project_author(self):
@@ -143,9 +143,9 @@ class DestroyCollaboratorTest(TestCase):
     def test_ko_not_project_author_but_supervisor(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.SUPERVISOR_ROLE)
+                                          role=models.Collaborator.SUPERVISOR_ROLE)
 
         response = self.client.delete(
             reverse_lazy('projects:users-detail',
@@ -157,9 +157,9 @@ class DestroyCollaboratorTest(TestCase):
 
     def test_ko_not_authenticated(self):
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.delete(
             reverse_lazy('projects:users-detail',
@@ -189,24 +189,24 @@ class ListCollaboratorsTest(TestCase):
             type=models.Project.BACKEND_TYPE
         )
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.collaborators[0],
             project=self.project,
-            role=models.Contributor.CONTRIBUTOR_ROLE
+            role=models.Collaborator.CONTRIBUTOR_ROLE
         )
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.collaborators[1],
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
     def test_ok_author(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.get(reverse_lazy('projects:users-list', kwargs={
             'project_pk': self.project.id
@@ -218,10 +218,10 @@ class ListCollaboratorsTest(TestCase):
     def test_ok_collaborator(self):
         self.client.force_authenticate(self.user)
 
-        models.Contributor.objects.create(
+        models.Collaborator.objects.create(
             user=self.user,
             project=self.project,
-            role=models.Contributor.SUPERVISOR_ROLE
+            role=models.Collaborator.SUPERVISOR_ROLE
         )
 
         response = self.client.get(reverse_lazy('projects:users-list', kwargs={
@@ -241,9 +241,9 @@ class ListCollaboratorsTest(TestCase):
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
     def test_ko_not_authenticated(self):
-        models.Contributor.objects.create(user=self.user,
+        models.Collaborator.objects.create(user=self.user,
                                           project=self.project,
-                                          role=models.Contributor.AUTHOR_ROLE)
+                                          role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.get(reverse_lazy('projects:users-list', kwargs={
             'project_pk': self.project.id

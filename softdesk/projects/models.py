@@ -20,7 +20,7 @@ class Project(models.Model):
     type = models.CharField(max_length=64, choices=TYPES)
 
 
-class Contributor(models.Model):
+class Collaborator(models.Model):
     SUPERVISOR_ROLE = 'SUPERVISOR'
     CONTRIBUTOR_ROLE = 'CONTRIBUTOR'
     AUTHOR_ROLE = 'AUTHOR'
