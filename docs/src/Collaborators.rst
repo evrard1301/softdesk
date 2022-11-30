@@ -1,0 +1,19 @@
+Collaborators
+=============
+
+Assign Collaborator
+-------------------
+
+ +----------------------------+
+ | POST /projects/{id}/users/ |
+ +----------------------------+
+
+Assigns a user to a project as an author, a contributor or a
+supervisor.
+
+**user**
+  The ID of the user to assign.
+
+**role**
+  The role (ie. the status) of the user for this project.
+  Either AUTHOR, CONTRIBUTOR or SUPERVISOR.

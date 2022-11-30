@@ -26,6 +26,11 @@ class CreateProjectTest(TestCase):
         self.assertEqual('this is my project', project.description)
         self.assertEqual(models.Project.ANDROID_TYPE, project.type)
 
+        contribs = models.Contributor.objects.filter(user=self.user,
+                                                    project=project)
+        self.assertEqual(1, contribs.count())
+        self.assertEqual(models.Contributor.AUTHOR_ROLE, contribs[0].role)
+        
     def test_err_not_authenticated(self):
         response = self.client.post(reverse_lazy('projects:projects-list'), {
             'title': 'My project',

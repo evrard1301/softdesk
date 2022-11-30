@@ -39,6 +39,12 @@ class ProjectView(mixins.CreateModelMixin,
         return [
             rest_permissions.IsAuthenticated()
         ]
+    
+    def perform_create(self, serializer):        
+        project = serializer.save()
+        models.Contributor.objects.create(user=self.request.user,
+                                          project=project,
+                                          role=models.Contributor.AUTHOR_ROLE)
 
 
 class UserView(mixins.CreateModelMixin,
