@@ -35,3 +35,11 @@ class IsIssueAuthor(BasePermission):
         issue = view.get_object()
         
         return issue.author.id == user.id
+
+
+class IsCommentAuthor(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        comment = view.get_object()
+        
+        return comment.author.id == user.id
