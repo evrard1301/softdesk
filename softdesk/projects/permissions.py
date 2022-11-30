@@ -27,3 +27,11 @@ class IsProjectRelated(BasePermission):
         project = get_project(view)
         return models.Contributor.objects.filter(user=user,
                                                  project=project).count() > 0
+
+
+class IsIssueAuthor(BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        issue = view.get_object()
+        
+        return issue.author.id == user.id

@@ -13,7 +13,11 @@ users.register('users',
                views.UserView,
                basename='users')
 
+issues = routers.NestedSimpleRouter(projects, 'projects', lookup='project')
+issues.register('issues', views.IssueView, basename='issues')
+
 urlpatterns = [
     path('', include(projects.urls)),
     path('', include(users.urls)),
+    path('', include(issues.urls)),
 ]

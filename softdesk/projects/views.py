@@ -100,3 +100,21 @@ class UserView(mixins.CreateModelMixin,
         contrib.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
+
+class IssueView(mixins.CreateModelMixin,
+                mixins.UpdateModelMixin,
+                viewsets.GenericViewSet):
+    serializer_class = serializers.IssueSerializer
+    queryset = models.Issue.objects.all()
+
+    def get_permissions(self):
+        if self.action in ['update']:
+            return [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsIssueAuthor()
+            ]
+        
+        return [
+            rest_permissions.IsAuthenticated(),
+            permissions.IsProjectRelated()
+        ]
