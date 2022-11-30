@@ -50,10 +50,17 @@ class ProjectView(mixins.CreateModelMixin,
 
 class UserView(mixins.CreateModelMixin,
                mixins.DestroyModelMixin,
+               mixins.ListModelMixin,
                viewsets.GenericViewSet):
     serializer_class = serializers.ContributorSerializer
     
     def get_permissions(self):
+        if self.action in ['list']:
+            return [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectRelated()
+            ]
+        
         return [
             rest_permissions.IsAuthenticated(),
             permissions.IsProjectAuthor()
@@ -92,3 +99,4 @@ class UserView(mixins.CreateModelMixin,
                                                  user=user)
         contrib.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    

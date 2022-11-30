@@ -16,7 +16,7 @@ class ProjectSerializer(ModelSerializer):
         ]
 
 
-class ContributorSerializer(nserializers.NestedHyperlinkedModelSerializer):
+class ContributorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Contributor
         fields = [

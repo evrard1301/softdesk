@@ -22,7 +22,7 @@ class IsProjectAuthor(BasePermission):
 
 
 class IsProjectRelated(BasePermission):
-    def has_permission(self, request, view):
+    def has_permission(self, request, view):        
         user = request.user
         project = get_project(view)
         return models.Contributor.objects.filter(user=user,

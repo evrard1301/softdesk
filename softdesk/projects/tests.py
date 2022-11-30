@@ -296,7 +296,7 @@ class ListProjectTest(TestCase):
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
 
 
-class CreateCollaborator(TestCase):
+class CreateCollaboratorTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username='bob',
@@ -379,7 +379,7 @@ class CreateCollaborator(TestCase):
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
 
         
-class DeleteCollaborator(TestCase):
+class DeleteCollaboratorTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(username='bob',
@@ -457,4 +457,86 @@ class DeleteCollaborator(TestCase):
                                  'pk': self.collaborator.id})
         )
 
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+        
+class ListCollaboratorsTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='bob',
+                                             password='coucou')
+        
+        self.collaborators = [
+            User.objects.create_user(username='sam',
+                                     password='hello'),
+            User.objects.create_user(username='tim',
+                                     password='hello aussi')
+        ]
+        
+        self.project = models.Project.objects.create(
+            title='my project',
+            description='',
+            type=models.Project.BACKEND_TYPE
+        )
+
+        models.Contributor.objects.create(
+            user=self.collaborators[0],
+            project=self.project,
+            role=models.Contributor.CONTRIBUTOR_ROLE
+        )
+
+        models.Contributor.objects.create(
+            user=self.collaborators[1],
+            project=self.project,
+            role=models.Contributor.SUPERVISOR_ROLE
+        )
+        
+    def test_ok_author(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)                
+        
+        response = self.client.get(reverse_lazy('projects:users-list', kwargs={
+            'project_pk': self.project.id
+        }))        
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(3, len(response.data))
+
+    def test_ok_collaborator(self):
+        self.client.force_authenticate(self.user)
+      
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.project,
+            role=models.Contributor.SUPERVISOR_ROLE
+        )                
+      
+        response = self.client.get(reverse_lazy('projects:users-list', kwargs={
+            'project_pk': self.project.id
+        }))        
+  
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(3, len(response.data))
+  
+    def test_ko_not_project_author(self):
+        self.client.force_authenticate(self.user)
+  
+        response = self.client.get(reverse_lazy('projects:users-list', kwargs={
+            'project_pk': self.project.id
+        }))        
+        
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+      
+    def test_ko_not_authenticated(self):
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)                
+      
+        response = self.client.get(reverse_lazy('projects:users-list', kwargs={
+            'project_pk': self.project.id
+        }))        
+  
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
