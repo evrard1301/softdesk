@@ -14,15 +14,15 @@ class ProjectView(mixins.CreateModelMixin,
                   mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   viewsets.GenericViewSet):
-    
+
     serializer_class = serializers.ProjectSerializer
-    
+
     def get_queryset(self):
         if self.action == 'list':
             user = self.request.user
             contribs = models.Contributor.objects.filter(user=user)
             return [contrib.project for contrib in contribs]
-                    
+
         return models.Project.objects.all()
 
     def get_permissions(self):
@@ -36,12 +36,12 @@ class ProjectView(mixins.CreateModelMixin,
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectRelated()
             ]
-        
+
         return [
             rest_permissions.IsAuthenticated()
         ]
-    
-    def perform_create(self, serializer):        
+
+    def perform_create(self, serializer):
         project = serializer.save()
         models.Contributor.objects.create(user=self.request.user,
                                           project=project,
@@ -53,14 +53,14 @@ class UserView(mixins.CreateModelMixin,
                mixins.ListModelMixin,
                viewsets.GenericViewSet):
     serializer_class = serializers.ContributorSerializer
-    
+
     def get_permissions(self):
         if self.action in ['list']:
             return [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectRelated()
             ]
-        
+
         return [
             rest_permissions.IsAuthenticated(),
             permissions.IsProjectAuthor()
@@ -68,13 +68,13 @@ class UserView(mixins.CreateModelMixin,
 
     def get_queryset(self):
         return models.Contributor.objects.all()
-        
+
     def create(self, request, *args, **kwargs):
         self.check_permissions(request)
         project = get_object_or_404(models.Project, pk=kwargs['project_pk'])
         user = request.user
         role = request.POST.get('role')
-        
+
         contrib = models.Contributor(project=project,
                                      user=user,
                                      role=role)
@@ -83,7 +83,7 @@ class UserView(mixins.CreateModelMixin,
             contrib.save()
         except Exception:
             Response(status=status.HTTP_400_BAD_REQUEST)
-        
+
         return Response(status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk, *args, **kwargs):
@@ -94,12 +94,12 @@ class UserView(mixins.CreateModelMixin,
         )
 
         user = get_object_or_404(User, pk=pk)
-        
+
         contrib = models.Contributor.objects.get(project=project,
                                                  user=user)
         contrib.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 
 class IssueView(mixins.CreateModelMixin,
                 mixins.UpdateModelMixin,
@@ -115,7 +115,18 @@ class IssueView(mixins.CreateModelMixin,
                 rest_permissions.IsAuthenticated(),
                 permissions.IsIssueAuthor()
             ]
-        
+
+        return [
+            rest_permissions.IsAuthenticated(),
+            permissions.IsProjectRelated()
+        ]
+
+
+class CommentView(mixins.CreateModelMixin,
+                  viewsets.GenericViewSet):
+    serializer_class = serializers.CommentSerializer
+
+    def get_permissions(self):
         return [
             rest_permissions.IsAuthenticated(),
             permissions.IsProjectRelated()

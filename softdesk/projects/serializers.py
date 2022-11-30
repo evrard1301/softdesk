@@ -34,3 +34,14 @@ class IssueSerializer(serializers.ModelSerializer):
             'author', 'assignee',
             'created'
         ]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Comment
+        fields = [
+            'description',
+            'author',
+            'issue',
+            'created'
+        ]
