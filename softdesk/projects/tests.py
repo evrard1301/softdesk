@@ -377,3 +377,84 @@ class CreateCollaborator(TestCase):
         )
 
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+        
+class DeleteCollaborator(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='bob',
+                                             password='coucou')
+        
+        self.collaborator = User.objects.create_user(username='sam',
+                                                     password='hello')
+        
+        self.project = models.Project.objects.create(
+            title='my project',
+            description='',
+            type=models.Project.BACKEND_TYPE
+        )
+
+        models.Contributor.objects.create(
+            user=self.collaborator,
+            project=self.project,
+            role=models.Contributor.CONTRIBUTOR_ROLE
+        )
+        
+    def test_ok(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)                
+        
+        response = self.client.delete(
+            reverse_lazy('projects:users-detail',
+                         kwargs={'project_pk': self.project.id,
+                                 'pk': self.collaborator.id})
+        )
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+        self.assertEqual(
+            0,
+            models.Contributor.objects.filter(user=self.collaborator).count()
+        )
+
+    def test_ko_not_project_author(self):
+        self.client.force_authenticate(self.user)
+
+        response = self.client.delete(
+            reverse_lazy('projects:users-detail',
+                         kwargs={'project_pk': self.project.id,
+                                 'pk': self.collaborator.id})
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        
+    def test_ko_not_project_author_but_supervisor(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.SUPERVISOR_ROLE)                
+        
+        response = self.client.delete(
+            reverse_lazy('projects:users-detail',
+                         kwargs={'project_pk': self.project.id,
+                                 'pk': self.collaborator.id})
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ko_not_authenticated(self):
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)                
+        
+        response = self.client.delete(
+            reverse_lazy('projects:users-detail',
+                         kwargs={'project_pk': self.project.id,
+                                 'pk': self.collaborator.id})
+        )
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)

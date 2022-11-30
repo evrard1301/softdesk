@@ -5,6 +5,7 @@ from rest_framework import permissions as rest_permissions
 from . import serializers
 from . import models
 from . import permissions
+from authentication.models import User
 
 
 class ProjectView(mixins.CreateModelMixin,
@@ -48,6 +49,7 @@ class ProjectView(mixins.CreateModelMixin,
 
 
 class UserView(mixins.CreateModelMixin,
+               mixins.DestroyModelMixin,
                viewsets.GenericViewSet):
     serializer_class = serializers.ContributorSerializer
     
@@ -60,7 +62,7 @@ class UserView(mixins.CreateModelMixin,
     def get_queryset(self):
         return models.Contributor.objects.all()
         
-    def create(self, request, *args, **kwargs):        
+    def create(self, request, *args, **kwargs):
         self.check_permissions(request)
         project = get_object_or_404(models.Project, pk=kwargs['project_pk'])
         user = request.user
@@ -76,3 +78,17 @@ class UserView(mixins.CreateModelMixin,
             Response(status=status.HTTP_400_BAD_REQUEST)
         
         return Response(status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk, *args, **kwargs):
+        self.check_permissions(request)
+        project = get_object_or_404(
+            models.Project,
+            pk=kwargs.get('project_pk')
+        )
+
+        user = get_object_or_404(User, pk=pk)
+        
+        contrib = models.Contributor.objects.get(project=project,
+                                                 user=user)
+        contrib.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

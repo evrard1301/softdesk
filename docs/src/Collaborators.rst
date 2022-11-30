@@ -1,8 +1,8 @@
 Collaborators
 =============
 
-Assign Collaborator
--------------------
+Assign a Collaborator
+---------------------
 
  +----------------------------+
  | POST /projects/{id}/users/ |
@@ -17,3 +17,12 @@ supervisor.
 **role**
   The role (ie. the status) of the user for this project.
   Either AUTHOR, CONTRIBUTOR or SUPERVISOR.
+
+Delete a Collaborator
+---------------------
+
+ +----------------------------------+
+ | DELETE /projects/{id}/users/{id} |
+ +----------------------------------+
+
+Removes a user from a given project.
