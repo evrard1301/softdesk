@@ -102,3 +102,62 @@ class UpdateProjectTest(TestCase):
             })
         
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+        
+class DeleteProjectTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('alice', 'azerty')
+        self.project = \
+            models.Project.objects.create(title='Project 0',
+                                          description='random stuff',
+                                          type=models.Project.IOS_TYPE)
+
+    def test_ok(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)
+        response = self.client.delete(
+            reverse_lazy('projects:projects-detail', args=[self.project.id])
+        )
+        
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+
+        self.assertEqual(
+            0,
+            models.Project.objects.filter(pk=self.project.id).count()
+        )
+
+    def test_err_not_authenticated(self):
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)
+        response = self.client.delete(
+            reverse_lazy('projects:projects-detail', args=[self.project.id])
+        )
+        
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+    def test_err_not_author(self):
+        self.client.force_authenticate(self.user)
+
+        response = self.client.delete(
+            reverse_lazy('projects:projects-detail', args=[self.project.id])
+        )
+        
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_err_not_author_but_supervisor(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.SUPERVISOR_ROLE)
+        response = self.client.delete(
+            reverse_lazy('projects:projects-detail', args=[self.project.id])
+        )
+        
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+

@@ -24,3 +24,12 @@ Allows an authenticated user to create a new project or to update an existing on
 **author**
   The author of the project.
 
+
+Delete a Project
+----------------
+
++------------------------+
+| DELETE /projects/{id}/ |
++------------------------+
+
+Deletes a given project.

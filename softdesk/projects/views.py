@@ -7,6 +7,7 @@ from . import permissions
 
 class ProjectView(mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
                   viewsets.GenericViewSet):
     
     serializer_class = serializers.ProjectSerializer
@@ -15,7 +16,7 @@ class ProjectView(mixins.CreateModelMixin,
         return models.Project.objects.all()
 
     def get_permissions(self):
-        if self.action == 'update':
+        if self.action in ['update', 'destroy']:
             return [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsProjectAuthor()
