@@ -4,9 +4,16 @@ from . import views
 
 app_name = 'projects'
 
-router = routers.SimpleRouter()
-router.register('projects', views.ProjectView, basename='projects')
+projects = routers.SimpleRouter()
+projects.register('projects', views.ProjectView, basename='projects')
+
+users = routers.NestedSimpleRouter(projects, 'projects',
+                                   lookup='project')
+users.register('users',
+               views.UserView,
+               basename='users')
 
 urlpatterns = [
-    path('/', include(router.urls))
+    path('', include(projects.urls)),
+    path('', include(users.urls)),
 ]

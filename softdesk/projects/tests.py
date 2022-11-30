@@ -289,3 +289,86 @@ class ListProjectTest(TestCase):
         )
         
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+
+class CreateCollaborator(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='bob',
+                                             password='coucou')
+        self.project = models.Project.objects.create(
+            title='my project',
+            description='',
+            type=models.Project.BACKEND_TYPE
+        )
+        
+    def test_ok(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)
+        
+        num_contrib = models.Contributor.objects.filter(user=self.user).count()
+        
+        response = self.client.post(
+            reverse_lazy('projects:users-list', kwargs={'project_pk':
+                                                        self.project.id}), {
+                'user': self.user.id,
+                'role': models.Contributor.SUPERVISOR_ROLE
+            }
+        )
+
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code)
+        self.assertEqual(
+            num_contrib + 1,
+            models.Contributor.objects.filter(user=self.user).count()
+        )
+
+    def test_ko_not_project_author(self):
+        self.client.force_authenticate(self.user)
+
+        response = self.client.post(
+            reverse_lazy('projects:users-list', kwargs={'project_pk':
+                                                        self.project.id}), {
+                'user': self.user.id,
+                'role': models.Contributor.SUPERVISOR_ROLE
+            }
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ko_not_project_author_but_supervisor(self):
+        self.client.force_authenticate(self.user)
+        
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.project,
+            role=models.Contributor.SUPERVISOR_ROLE
+        )
+
+        response = self.client.post(
+            reverse_lazy('projects:users-list', kwargs={'project_pk':
+                                                        self.project.id}), {
+                'user': self.user.id,
+                'role': models.Contributor.SUPERVISOR_ROLE
+            }
+        )
+
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+
+    def test_ko_not_authenticated(self):
+
+        models.Contributor.objects.create(user=self.user,
+                                          project=self.project,
+                                          role=models.Contributor.AUTHOR_ROLE)
+
+        response = self.client.post(
+            reverse_lazy('projects:users-list', kwargs={'project_pk':
+                                                        self.project.id}), {
+                'user': self.user.id,
+                'role': models.Contributor.SUPERVISOR_ROLE
+            }
+        )
+
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)

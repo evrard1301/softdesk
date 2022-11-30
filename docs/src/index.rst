@@ -2,7 +2,8 @@ Table des matières
 ==================
 
 .. toctree::
-   :glob:
     
    Installation
-   *
+   Authentication
+   Projects
+   Collaborators

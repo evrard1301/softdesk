@@ -1,4 +1,6 @@
-from rest_framework import viewsets, mixins
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, mixins, status
+from rest_framework.response import Response
 from rest_framework import permissions as rest_permissions
 from . import serializers
 from . import models
@@ -38,3 +40,33 @@ class ProjectView(mixins.CreateModelMixin,
             rest_permissions.IsAuthenticated()
         ]
 
+
+class UserView(mixins.CreateModelMixin,
+               viewsets.GenericViewSet):
+    serializer_class = serializers.ContributorSerializer
+    
+    def get_permissions(self):
+        return [
+            rest_permissions.IsAuthenticated(),
+            permissions.IsProjectAuthor()
+        ]
+
+    def get_queryset(self):
+        return models.Contributor.objects.all()
+        
+    def create(self, request, *args, **kwargs):        
+        self.check_permissions(request)
+        project = get_object_or_404(models.Project, pk=kwargs['project_pk'])
+        user = request.user
+        role = request.POST.get('role')
+        
+        contrib = models.Contributor(project=project,
+                                     user=user,
+                                     role=role)
+        try:
+            contrib.full_clean()
+            contrib.save()
+        except Exception:
+            Response(status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(status=status.HTTP_201_CREATED)

@@ -1,5 +1,8 @@
 from rest_framework.serializers import ModelSerializer
 from . import models
+from rest_framework import serializers
+from rest_framework_nested import serializers as nserializers
+from rest_framework_nested.relations import NestedHyperlinkedRelatedField
 
 
 class ProjectSerializer(ModelSerializer):
@@ -10,4 +13,14 @@ class ProjectSerializer(ModelSerializer):
             'title',
             'description',
             'type'
+        ]
+
+
+class ContributorSerializer(nserializers.NestedHyperlinkedModelSerializer):
+    class Meta:
+        model = models.Contributor
+        fields = [
+            'user',
+            'project',
+            'role'
         ]
