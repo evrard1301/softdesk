@@ -809,3 +809,89 @@ class UpdateIssueTest(TestCase):
             })
 
         self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+
+class DeleteIssueTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='bob',
+            password='bob'
+        )
+
+        self.assignee = User.objects.create_user(
+            username='dan',
+            password='dan'
+        )
+
+        self.project = models.Project.objects.create(
+            title='A Project',
+            description='This is a project',
+            type=models.Project.BACKEND_TYPE
+        )
+
+        self.issue = models.Issue.objects.create(
+            title='my issue',
+            description='this is my issue',
+            tag=models.Issue.BUG_TAG,
+            priority=1,
+            project=self.project,
+            status=models.Issue.OPEN_STATUS,
+            author=self.user,
+            assignee=self.assignee
+        )
+
+        self.issue_not_author = models.Issue.objects.create(
+            title='your issue',
+            description='not an author of this issue',
+            tag=models.Issue.BUG_TAG,
+            priority=1,
+            project=self.project,
+            status=models.Issue.OPEN_STATUS,
+            author=self.assignee,
+            assignee=self.assignee
+        )
+        
+    def test_ok_as_author(self):
+        self.client.force_authenticate(self.user)
+
+        count = models.Issue.objects.count()
+        
+        response = self.client.delete(
+            reverse_lazy('projects:issues-detail', kwargs={
+                'pk': self.issue.id,
+                'project_pk': self.project.id
+            })
+        )
+        
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+        self.assertEqual(count - 1, models.Issue.objects.count())
+        
+    def test_err_not_author(self):
+        self.client.force_authenticate(self.user)
+
+        count = models.Issue.objects.count()
+        
+        response = self.client.delete(
+            reverse_lazy('projects:issues-detail', kwargs={
+                'pk': self.issue_not_author.id,
+                'project_pk': self.project.id
+            })
+        )
+        
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        self.assertEqual(count, models.Issue.objects.count())
+
+    def test_err_not_authenticated(self):
+
+        count = models.Issue.objects.count()
+        
+        response = self.client.delete(
+            reverse_lazy('projects:issues-detail', kwargs={
+                'pk': self.issue.id,
+                'project_pk': self.project.id
+            })
+        )
+        
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+        self.assertEqual(count, models.Issue.objects.count())

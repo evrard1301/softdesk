@@ -35,3 +35,12 @@ Allows a project collaborator to create a new issue or to update an existing one
   
 **assignee**
   The ID of the assignee user.
+
+Delete an Issue
+---------------
+
++-----------------------------------+
+| DELETE /projects/{id}/issues/{id} |
++-----------------------------------+
+
+Deletes an issue of a given project.

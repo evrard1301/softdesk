@@ -103,12 +103,13 @@ class UserView(mixins.CreateModelMixin,
 
 class IssueView(mixins.CreateModelMixin,
                 mixins.UpdateModelMixin,
+                mixins.DestroyModelMixin,
                 viewsets.GenericViewSet):
     serializer_class = serializers.IssueSerializer
     queryset = models.Issue.objects.all()
 
     def get_permissions(self):
-        if self.action in ['update']:
+        if self.action in ['update', 'destroy']:
             return [
                 rest_permissions.IsAuthenticated(),
                 permissions.IsIssueAuthor()
