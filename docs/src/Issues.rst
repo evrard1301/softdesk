@@ -36,6 +36,15 @@ Allows a project collaborator to create a new issue or to update an existing one
 **assignee**
   The ID of the assignee user.
 
+List Issues
+-----------
+
++----------------------------+
+| GET /projects/{id}/issues/ |
++----------------------------+
+
+Returns the list of the issues of a given project.
+
 Delete an Issue
 ---------------
 

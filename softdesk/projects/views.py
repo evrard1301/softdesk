@@ -104,6 +104,7 @@ class UserView(mixins.CreateModelMixin,
 class IssueView(mixins.CreateModelMixin,
                 mixins.UpdateModelMixin,
                 mixins.DestroyModelMixin,
+                mixins.ListModelMixin,
                 viewsets.GenericViewSet):
     serializer_class = serializers.IssueSerializer
     queryset = models.Issue.objects.all()
