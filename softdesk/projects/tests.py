@@ -161,3 +161,131 @@ class DeleteProjectTest(TestCase):
         
         self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
 
+
+class ListProjectsTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('alice', 'azerty')
+        self.projects = [
+            models.Project.objects.create(title='Project 0',
+                                          description='random stuff',
+                                          type=models.Project.FRONTEND_TYPE),
+            models.Project.objects.create(title='Project 1',
+                                          description='random stuff',
+                                          type=models.Project.BACKEND_TYPE),
+            models.Project.objects.create(title='Project 2',
+                                          description='random stuff',
+                                          type=models.Project.ANDROID_TYPE)
+        ]
+
+    def test_ok_related_to_all_projects(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.projects[0],
+            role=models.Contributor.AUTHOR_ROLE
+        )
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.projects[1],
+            role=models.Contributor.SUPERVISOR_ROLE
+        )
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.projects[2],
+            role=models.Contributor.CONTRIBUTOR_ROLE
+        )
+
+        response = self.client.get(
+            reverse_lazy('projects:projects-list')
+        )
+        
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(3, len(response.data))
+        
+    def test_ok_related_to_one_project(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.projects[1],
+            role=models.Contributor.CONTRIBUTOR_ROLE
+        )
+
+        response = self.client.get(
+            reverse_lazy('projects:projects-list')
+        )
+        
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(1, len(response.data))
+        self.assertEqual('Project 1', response.data[0].get('title'))
+
+    def test_ok_not_related_to_any_project(self):
+        self.client.force_authenticate(self.user)
+
+        response = self.client.get(
+            reverse_lazy('projects:projects-list')
+        )
+        
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(0, len(response.data))
+        
+    def test_err_not_authenticated(self):
+        response = self.client.get(
+            reverse_lazy('projects:projects-list')
+        )
+        
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)
+
+
+class ListProjectTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user('alice', 'azerty')
+        self.projects = [
+            models.Project.objects.create(title='Project 0',
+                                          description='random stuff',
+                                          type=models.Project.FRONTEND_TYPE),
+            models.Project.objects.create(title='Project 1',
+                                          description='random stuff',
+                                          type=models.Project.BACKEND_TYPE),
+            models.Project.objects.create(title='Project 2',
+                                          description='random stuff',
+                                          type=models.Project.ANDROID_TYPE)
+        ]
+
+    def test_ok_related_to_the_project(self):
+        self.client.force_authenticate(self.user)
+
+        models.Contributor.objects.create(
+            user=self.user,
+            project=self.projects[2],
+            role=models.Contributor.CONTRIBUTOR_ROLE
+        )
+
+        response = self.client.get(
+            reverse_lazy('projects:projects-detail',
+                         args=[self.projects[2].id])
+        )
+        
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual('Project 2', response.data.get('title'))
+        
+    def test_ok_not_related_to_the_project(self):
+        self.client.force_authenticate(self.user)
+
+        response = self.client.get(
+            reverse_lazy('projects:projects-detail', args=[self.projects[1].id])
+        )
+        
+        self.assertEqual(status.HTTP_403_FORBIDDEN, response.status_code)
+        
+    def test_err_not_authenticated(self):
+        response = self.client.get(
+            reverse_lazy('projects:projects-detail', args=[self.projects[0].id])
+        )
+        
+        self.assertEqual(status.HTTP_401_UNAUTHORIZED, response.status_code)

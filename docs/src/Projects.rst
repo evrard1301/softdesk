@@ -33,3 +33,15 @@ Delete a Project
 +------------------------+
 
 Deletes a given project.
+
+List Projects
+-------------
+
++---------------+---------------------+
+| Many projects | GET /projects/      |
++---------------+---------------------+
+| One project   | GET /projects/{id}/ |
++---------------+---------------------+
+
+List one or many  projects related to the authenticated user.
+ie. The user is either a contributor, a supervisor or the author of the projects.
