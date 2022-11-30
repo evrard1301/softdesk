@@ -125,6 +125,8 @@ class IssueView(mixins.CreateModelMixin,
 class CommentView(mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
+                  mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
                   viewsets.GenericViewSet):
     serializer_class = serializers.CommentSerializer
     queryset = models.Comment.objects.all()
