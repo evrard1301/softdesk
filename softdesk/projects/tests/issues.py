@@ -42,7 +42,6 @@ class CreateIssueTest(TestCase):
                 'description': 'this is my issue',
                 'tag': models.Issue.BUG_TAG,
                 'priority': 1,
-                'project': self.project.id,
                 'status': models.Issue.OPEN_STATUS,
                 'author': self.user.id,
                 'assignee': self.assignee.id
@@ -77,7 +76,6 @@ class CreateIssueTest(TestCase):
                 'description': 'this is my issue',
                 'tag': models.Issue.BUG_TAG,
                 'priority': 1,
-                'project': self.project.id,
                 'status': models.Issue.OPEN_STATUS,
                 'author': self.user.id,
                 'assignee': self.assignee.id
@@ -96,7 +94,6 @@ class CreateIssueTest(TestCase):
                 'description': 'this is my issue',
                 'tag': models.Issue.BUG_TAG,
                 'priority': 1,
-                'project': self.project.id,
                 'status': models.Issue.OPEN_STATUS,
                 'author': self.user.id,
                 'assignee': self.assignee.id
@@ -119,7 +116,6 @@ class CreateIssueTest(TestCase):
                 'description': 'this is my issue',
                 'tag': models.Issue.BUG_TAG,
                 'priority': 1,
-                'project': self.project.id,
                 'status': models.Issue.OPEN_STATUS,
                 'author': self.user.id,
                 'assignee': self.assignee.id

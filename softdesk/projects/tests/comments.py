@@ -64,8 +64,7 @@ class CreateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 
@@ -86,8 +85,7 @@ class CreateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 
@@ -108,8 +106,7 @@ class CreateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 
@@ -187,8 +184,7 @@ class UpdateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment 2',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 
@@ -210,8 +206,7 @@ class UpdateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment 2',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 
@@ -235,8 +230,7 @@ class UpdateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment 2',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 
@@ -258,8 +252,7 @@ class UpdateCommentTest(TestCase):
                 }
             ), {
                 'description': 'my comment 2',
-                'author': self.user.id,
-                'issue': self.issue.id
+                'author': self.user.id
             }
         )
 

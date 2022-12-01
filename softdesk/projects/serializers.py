@@ -18,6 +18,7 @@ class CollaboratorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Collaborator
         fields = [
+            'id',
             'user',
             'project',
             'role'
@@ -25,9 +26,12 @@ class CollaboratorSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
+    project = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         model = models.Issue
         fields = [
+            'id',
             'title', 'description',
             'tag', 'priority',
             'project', 'status',
@@ -37,11 +41,15 @@ class IssueSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    issue = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         model = models.Comment
         fields = [
+            'id',
             'description',
             'author',
             'issue',
             'created'
         ]
+        

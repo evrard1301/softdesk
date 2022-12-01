@@ -23,10 +23,7 @@ Allows a project collaborator to create a new issue or to update an existing one
 
 **priority**
   An integer representing the priority of the project.
-  
-**project**
-  The project of the issue.
-  
+    
 **status**
   The status of the issue: OPEN or CLOSED.
   

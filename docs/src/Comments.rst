@@ -18,9 +18,6 @@ Allows a project collaborator to create a new issue comment or to update an exis
 **author**
   The author of the comment.
 
-**issue**
-  The issue from where the comment belongs.
-
 Delete a Comment
 ----------------
 

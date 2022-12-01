@@ -121,7 +121,13 @@ class IssueView(mixins.CreateModelMixin,
             permissions.IsProjectRelated()
         ]
 
+    def perform_create(self, serializer):
+        serializer.save(project=get_object_or_404(
+            models.Project,
+            pk=self.kwargs.get('project_pk')
+        ))
 
+    
 class CommentView(mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.DestroyModelMixin,
@@ -130,7 +136,7 @@ class CommentView(mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     serializer_class = serializers.CommentSerializer
     queryset = models.Comment.objects.all()
-
+    
     def get_permissions(self):
         if self.action in ['update', 'destroy']:
             return [
@@ -142,4 +148,10 @@ class CommentView(mixins.CreateModelMixin,
         return [
             rest_permissions.IsAuthenticated(),
             permissions.IsProjectRelated()
-        ]
+        ]        
+    
+    def perform_create(self, serializer):
+        serializer.save(issue=get_object_or_404(
+            models.Issue,
+            pk=self.kwargs['issue_pk']
+        ))
