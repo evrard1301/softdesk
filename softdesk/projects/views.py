@@ -43,9 +43,11 @@ class ProjectView(mixins.CreateModelMixin,
 
     def perform_create(self, serializer):
         project = serializer.save()
-        models.Collaborator.objects.create(user=self.request.user,
-                                          project=project,
-                                          role=models.Collaborator.AUTHOR_ROLE)
+        models.Collaborator.objects.create(
+            user=self.request.user,
+            project=project,
+            role=models.Collaborator.AUTHOR_ROLE
+        )
 
 
 class UserView(mixins.CreateModelMixin,

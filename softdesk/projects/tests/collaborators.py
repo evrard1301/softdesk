@@ -21,8 +21,8 @@ class CreateCollaboratorTest(TestCase):
         self.client.force_authenticate(self.user)
 
         models.Collaborator.objects.create(user=self.user,
-                                          project=self.project,
-                                          role=models.Collaborator.AUTHOR_ROLE)
+                                           project=self.project,
+                                           role=models.Collaborator.AUTHOR_ROLE)
 
         num_contrib = models.Collaborator.objects.filter(user=self.user).count()
 
@@ -75,8 +75,8 @@ class CreateCollaboratorTest(TestCase):
     def test_ko_not_authenticated(self):
 
         models.Collaborator.objects.create(user=self.user,
-                                          project=self.project,
-                                          role=models.Collaborator.AUTHOR_ROLE)
+                                           project=self.project,
+                                           role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.post(
             reverse_lazy('projects:users-list', kwargs={'project_pk':
@@ -114,8 +114,35 @@ class DestroyCollaboratorTest(TestCase):
         self.client.force_authenticate(self.user)
 
         models.Collaborator.objects.create(user=self.user,
-                                          project=self.project,
-                                          role=models.Collaborator.AUTHOR_ROLE)
+                                           project=self.project,
+                                           role=models.Collaborator.AUTHOR_ROLE)
+
+        response = self.client.delete(
+            reverse_lazy('projects:users-detail',
+                         kwargs={'project_pk': self.project.id,
+                                 'pk': self.collaborator.id})
+        )
+
+        self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
+        self.assertEqual(
+            0,
+            models.Collaborator.objects.filter(user=self.collaborator).count()
+        )
+
+    def test_ok_author_and_contributor(self):
+        self.client.force_authenticate(self.user)
+
+        models.Collaborator.objects.create(
+            user=self.user,
+            project=self.project,
+            role=models.Collaborator.AUTHOR_ROLE
+        )
+
+        models.Collaborator.objects.create(
+            user=self.user,
+            project=self.project,
+            role=models.Collaborator.CONTRIBUTOR_ROLE
+        )
 
         response = self.client.delete(
             reverse_lazy('projects:users-detail',
@@ -144,8 +171,8 @@ class DestroyCollaboratorTest(TestCase):
         self.client.force_authenticate(self.user)
 
         models.Collaborator.objects.create(user=self.user,
-                                          project=self.project,
-                                          role=models.Collaborator.SUPERVISOR_ROLE)
+                                           project=self.project,
+                                           role=models.Collaborator.SUPERVISOR_ROLE)
 
         response = self.client.delete(
             reverse_lazy('projects:users-detail',
@@ -242,8 +269,8 @@ class ListCollaboratorsTest(TestCase):
 
     def test_ko_not_authenticated(self):
         models.Collaborator.objects.create(user=self.user,
-                                          project=self.project,
-                                          role=models.Collaborator.AUTHOR_ROLE)
+                                           project=self.project,
+                                           role=models.Collaborator.AUTHOR_ROLE)
 
         response = self.client.get(reverse_lazy('projects:users-list', kwargs={
             'project_pk': self.project.id
