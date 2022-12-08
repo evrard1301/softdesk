@@ -1,27 +1,23 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Collaborators &#8212; SoftDesk  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Comments" href="Comments.html" />
     <link rel="prev" title="Authentication" href="Authentication.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
@@ -31,16 +27,17 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          
-
           <div class="body" role="main">
             
-  <section id="collaborators">
-<h1>Collaborators<a class="headerlink" href="#collaborators" title="Permalink to this heading">¶</a></h1>
-<section id="assign-a-collaborator">
-<h2>Assign a Collaborator<a class="headerlink" href="#assign-a-collaborator" title="Permalink to this heading">¶</a></h2>
+  <div class="section" id="collaborators">
+<h1>Collaborators<a class="headerlink" href="#collaborators" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="assign-a-collaborator">
+<h2>Assign a Collaborator<a class="headerlink" href="#assign-a-collaborator" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><table class="docutils align-default">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>POST /projects/{id}/users/</p></td>
 </tr>
@@ -56,11 +53,14 @@ supervisor.</p>
 Either AUTHOR, CONTRIBUTOR or SUPERVISOR.</p>
 </dd>
 </dl>
-</section>
-<section id="delete-a-collaborator">
-<h2>Delete a Collaborator<a class="headerlink" href="#delete-a-collaborator" title="Permalink to this heading">¶</a></h2>
+</div>
+<div class="section" id="delete-a-collaborator">
+<h2>Delete a Collaborator<a class="headerlink" href="#delete-a-collaborator" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><table class="docutils align-default">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>DELETE /projects/{id}/users/{id}</p></td>
 </tr>
@@ -68,11 +68,14 @@ Either AUTHOR, CONTRIBUTOR or SUPERVISOR.</p>
 </table>
 </div></blockquote>
 <p>Removes a user from a given project.</p>
-</section>
-<section id="list-collaborators">
-<h2>List Collaborators<a class="headerlink" href="#list-collaborators" title="Permalink to this heading">¶</a></h2>
+</div>
+<div class="section" id="list-collaborators">
+<h2>List Collaborators<a class="headerlink" href="#list-collaborators" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><table class="docutils align-default">
+<colgroup>
+<col style="width: 100%" />
+</colgroup>
 <tbody>
 <tr class="row-odd"><td><p>GET /projects/{id}/users/</p></td>
 </tr>
@@ -80,12 +83,11 @@ Either AUTHOR, CONTRIBUTOR or SUPERVISOR.</p>
 </table>
 </div></blockquote>
 <p>Returns a list of all the collaborators of a given project.</p>
-</section>
-</section>
+</div>
+</div>
 
 
           </div>
-          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -127,20 +129,12 @@ Either AUTHOR, CONTRIBUTOR or SUPERVISOR.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -149,8 +143,8 @@ Either AUTHOR, CONTRIBUTOR or SUPERVISOR.</p>
       &copy;.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
       
       |
       <a href="_sources/Collaborators.rst.txt"
