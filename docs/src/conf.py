@@ -1,2 +1,2 @@
 project = 'SoftDesk'
-html_theme = 'furo'
+#html_theme = 'furo'
