@@ -4,11 +4,11 @@ Issues
 Create / Update an Issue
 -------------------------
 
-+--------+----------------------------------+
-| Create | POST /projects/{id}/issues/      |
-+--------+----------------------------------+
-| Update | PUT /projects/{id}/issues/{id}/  |
-+--------+----------------------------------+
+ +--------+----------------------------------+
+ | Create | POST /projects/{id}/issues/      |
+ +--------+----------------------------------+
+ | Update | PUT /projects/{id}/issues/{id}/  |
+ +--------+----------------------------------+
 
 Allows a project collaborator to create a new issue or to update an existing one.
 
@@ -36,17 +36,17 @@ Allows a project collaborator to create a new issue or to update an existing one
 List Issues
 -----------
 
-+----------------------------+
-| GET /projects/{id}/issues/ |
-+----------------------------+
+ +----------------------------+
+ | GET /projects/{id}/issues/ |
+ +----------------------------+
 
 Returns the list of the issues of a given project.
 
 Delete an Issue
 ---------------
 
-+-----------------------------------+
-| DELETE /projects/{id}/issues/{id} |
-+-----------------------------------+
+ +-----------------------------------+
+ | DELETE /projects/{id}/issues/{id} |
+ +-----------------------------------+
 
 Deletes an issue of a given project.

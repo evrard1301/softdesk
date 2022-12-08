@@ -4,9 +4,9 @@ Authentication
 Create an account
 -----------------
 
-+---------------+
-| POST /signup/ |
-+---------------+
+ +---------------+
+ | POST /signup/ |
+ +---------------+
 
 Allows a new user to create an account.
 
@@ -30,9 +30,9 @@ Returns code 201 on success, 400 otherwise.
 Log In
 ------
 
-+--------------+
-| POST /login/ |
-+--------------+
+ +--------------+
+ | POST /login/ |
+ +--------------+
 
 Allows an existing user to log in by receiving a JWT token.
 
