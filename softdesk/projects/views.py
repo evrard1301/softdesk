@@ -78,8 +78,8 @@ class UserView(mixins.CreateModelMixin,
         role = request.POST.get('role')
 
         contrib = models.Collaborator(project=project,
-                                     user=user,
-                                     role=role)
+                                      user=user,
+                                      role=role)
         try:
             contrib.full_clean()
             contrib.save()

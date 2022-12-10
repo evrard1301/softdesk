@@ -4,20 +4,343 @@
 \end{frame}
 
 \begin{frame}{Vue d'ensemble}
+  \begin{block}{Applications}
+    \begin{itemize}
+    \item \textsf{authentication}: pour gérer les utilisateurs et
+      l'authentification.
+    \item \textsf{project}: pour gérer les projets et ce qui tournent
+      autour.
+    \end{itemize}
+  \end{block}
 \end{frame}
 
-\begin{frame}{Les rôles}  
+\begin{frame}[fragile]{L'authentification}
+  \begin{itemize}
+  \item Authentification par jeton JWT.
+  \item Utilisation de la bibliothèque
+    \textsf{djangorestframework-simplejwt}.
+  \item Fournit une vue toute faite \textsf{TokenObtainPairView}.
+  \end{itemize}
+
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+      ...
+      from rest_framework_simplejwt.views import TokenObtainPairView
+      
+      urlpatterns = [
+          ...
+          path('login/', TokenObtainPairView.as_view(), name='login')    
+      ]
+    \end{lstlisting}
+  \end{center}
 \end{frame}
 
-\begin{frame}{L'authentification}  
+\begin{frame}{Les rôles}
+  \begin{block}{Plusieurs rôles possibles}
+    \begin{itemize}
+    \item Collaborateur d'un projet:
+      \begin{itemize}
+      \item Contributeur (\textit{contributor})
+      \item Responsable (\textit{supervisor})
+      \item Auteur (\textit{author})
+      \end{itemize}
+    \item Un utilisateur peut avoir plusieurs rôles !
+    \end{itemize}
+  \end{block}
 \end{frame}
 
-\begin{frame}{Les projets}  
+\begin{frame}[fragile]{Modèle d'un collaborateur}
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+    class Collaborator(models.Model):
+      SUPERVISOR_ROLE = 'SUPERVISOR'
+      CONTRIBUTOR_ROLE = 'CONTRIBUTOR'
+      AUTHOR_ROLE = 'AUTHOR'
+      
+      ROLES = [
+        (SUPERVISOR_ROLE, 'supervisor'),
+        (CONTRIBUTOR_ROLE, 'contributor'),
+        (AUTHOR_ROLE, 'author')
+      ]
+      
+      user = models.ForeignKey(User, on_delete=models.CASCADE)
+      project = models.ForeignKey(Project, on_delete=models.CASCADE)
+      role = models.CharField(max_length=256, choices=ROLES)
+    \end{lstlisting}
+  \end{center}
 \end{frame}
 
-\begin{frame}{Les problèmes}
+\begin{frame}[fragile]{Les projets}
+  \begin{block}{Un projet c'est:}
+    \begin{itemize}
+    \item Un titre.
+    \item Une description.
+    \item Un type: ANDROID, IOS, FRONTEND ou BACKEND.
+    \end{itemize}
+  \end{block}
+
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+  class Project(models.Model):
+    ANDROID_TYPE = 'ANDROID'
+    IOS_TYPE = 'IOS'
+    BACKEND_TYPE = 'BACKEND'
+    FRONTEND_TYPE = 'FRONTEND'
+    
+    TYPES = [
+        (ANDROID_TYPE, 'Android'),
+        (IOS_TYPE, 'IOS'),
+        (BACKEND_TYPE, 'Back-end'),
+        (FRONTEND_TYPE, 'Front-End')
+    ]
+    
+    title = models.CharField(max_length=256)
+    description = models.CharField(max_length=4096)
+    type = models.CharField(max_length=64, choices=TYPES)
+    \end{lstlisting}
+  \end{center}
 \end{frame}
 
-\begin{frame}{Les commentaires}
+\begin{frame}[fragile]{Modèle d'un problème}
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+      class Issue(models.Model):
+        # ...
+      
+        title = models.CharField(max_length=256)
+        description = models.CharField(max_length=4096)
+        tag = models.CharField(max_length=128, choices=TAGS)
+        priority = models.IntegerField()
+        status = models.CharField(max_length=128, choices=STATUS)
+        project = models.ForeignKey(Project, on_delete=models.CASCADE)
+        author = models.ForeignKey(
+            User,
+            on_delete=models.CASCADE,
+            related_name='author'
+        )
+        assignee = models.ForeignKey(
+            User,
+            on_delete=models.CASCADE,
+            related_name='assignee'
+        )
+        created = models.DateTimeField(auto_now=True)
+    \end{lstlisting}
+  \end{center}
 \end{frame}
 
+\begin{frame}[fragile]{Tags et status}
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+      class Issue(models.Model):
+        BUG_TAG = 'BUG'
+        IMPROVEMENT_TAG = 'IMPROVEMENT'
+        TASK_TAG = 'TASK'
+        
+        TAGS = [
+            (BUG_TAG, 'bug'),
+            (IMPROVEMENT_TAG, 'improvement'),
+            (TASK_TAG, 'task')
+        ]
+        
+        OPEN_STATUS = 'OPEN'
+        CLOSED_STATUS = 'CLOSED'
+        
+        STATUS = [
+            (OPEN_STATUS, 'open'),
+            (CLOSED_STATUS, 'closed')
+        ]
+
+        # ...
+    \end{lstlisting}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Modèle d'un commentaire}
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+      class Comment(models.Model):
+        description = models.CharField(max_length=4096)
+        author = models.ForeignKey(User, on_delete=models.CASCADE)
+        issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
+        created = models.DateTimeField(auto_now=True)
+    \end{lstlisting}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}[fragile]{Sérialisation des modèles}
+  \begin{block}{Motivation}
+    \begin{itemize}
+    \item Permet de passer d'une classe python au format JSON.
+    \item Utilisation de la classe \textsf{ModelSerializer} de DRF.
+    \end{itemize}        
+  \end{block}
+
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=Python]
+      class ProjectSerializer(ModelSerializer):
+        class Meta:
+            model = models.Project
+            fields = [
+                'id',
+                'title',
+                'description',
+                'type'
+            ]
+    \end{lstlisting}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Les vues}
+  \begin{block}{Les vues DRF}
+    \begin{itemize}
+    \item Représentent une série de \textit{endpoint} de l'API.
+    \item Il y a une vue par type de ressource (projets, problèmes, commentaires etc).
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Exemple: la vue des commentaires}
+  \begin{block}{Définition}
+    \begin{center}    
+      \tiny
+      \begin{lstlisting}[language=python]
+        class CommentView(mixins.CreateModelMixin,
+                          mixins.UpdateModelMixin,
+	                  mixins.DestroyModelMixin,
+                          mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+	                  viewsets.GenericViewSet):
+          serializer_class = serializers.CommentSerializer
+          queryset = models.Comment.objects.all()
+      \end{lstlisting}
+    \end{center}
+  \end{block}
+\end{frame}
+
+
+\begin{frame}[fragile]{Exemple: la vue des commentaires}
+  \begin{block}{Permissions}
+    \begin{center}    
+      \tiny
+      \begin{lstlisting}[language=python]
+        class CommentView(mixins.CreateModelMixin,
+                          mixins.UpdateModelMixin,
+	                  mixins.DestroyModelMixin,
+                          mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+	                  viewsets.GenericViewSet):
+
+          # ...
+                          
+          def get_permissions(self):
+	    if self.action in ['update', 'destroy']:
+                return [
+                    rest_permissions.IsAuthenticated(),
+                    permissions.IsProjectRelated(),
+                    permissions.IsCommentAuthor()
+                ]
+            
+            return [
+                rest_permissions.IsAuthenticated(),
+                permissions.IsProjectRelated()
+            ]                
+      \end{lstlisting}
+    \end{center}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Les types de permissions}
+  \begin{block}{Types}
+    \begin{itemize}
+    \item IsProjectAuthor
+    \item IsProjectRelated
+    \item IsIssueAuthor
+    \item IsCommentAuthor
+    \end{itemize}
+  \end{block}
+
+  \begin{block}{Exemple}
+    \begin{center}
+      \tiny
+      \begin{lstlisting}[language=python]
+        class IsProjectAuthor(BasePermission):
+          def has_permission(self, request, view):
+            user = request.user
+            project = get_project(view)
+            
+            role = models.Collaborator.AUTHOR_ROLE
+            return models.Collaborator.objects.filter(user=user,
+                                                      project=project,
+	                                              role=role).count() > 0
+      \end{lstlisting}
+    \end{center}
+  \end{block}
+  
+\end{frame}
+
+\begin{frame}{URL et routage}
+  \begin{block}{Django Rest Framework}
+    \begin{itemize}
+    \item Permet de définir des routeurs permettant de servir une
+      série d'URL directement à partir d'une vue DRF.
+    \item \textbf{Ne permet pas} de gérer facilement les ressources imbriquées.
+    \item La documentation de
+      DRF\footnote{\url{https://www.django-rest-framework.org/api-guide/routers/\#drf-nested-routers}}
+      évoque une bibliothèque supplémentaire permettant justement de
+      gérer ce cas de figure.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]{URL et routage}
+  \begin{block}{Django Rest Framework Nested Routers}
+    \begin{itemize}
+    \item Permet de définir ressources imbriqués \textit{via} un
+      routeur \textsf{NestedSImpleRouter}.
+    \end{itemize}
+  \end{block}
+
+  \begin{center}
+    \tiny
+    \begin{lstlisting}[language=python]
+      projects = routers.SimpleRouter()
+      projects.register('projects', views.ProjectView, basename='projects')
+      
+      users = routers.NestedSimpleRouter(projects, 'projects',
+                                         lookup='project')
+      users.register('users',
+                     views.UserView,
+                     basename='users')
+      
+      issues = routers.NestedSimpleRouter(projects, 'projects', lookup='project')
+      issues.register('issues', views.IssueView, basename='issues')
+      
+      comments = routers.NestedSimpleRouter(issues, 'issues', lookup='issue')
+      comments.register('comments', views.CommentView, basename='comments')
+    \end{lstlisting}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Définitions des routes}
+  \begin{block}{Les routes}
+    \begin{center}
+      \tiny
+      \begin{lstlisting}[language=python]
+        urlpatterns = [
+          path('', include(projects.urls)),
+          path('', include(users.urls)),
+          path('', include(issues.urls)),
+          path('', include(comments.urls)),
+        ]
+      \end{lstlisting}
+    \end{center}
+  \end{block}
+\end{frame}
