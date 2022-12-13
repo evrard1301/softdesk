@@ -44,7 +44,7 @@ class ProjectView(mixins.CreateModelMixin,
     def perform_create(self, serializer):
         project = serializer.save()
         models.Collaborator.objects.create(
-            user=self.request.user,
+            user=get_object_or_404(User, pk=self.request.POST.get('author')),
             project=project,
             role=models.Collaborator.AUTHOR_ROLE
         )
@@ -74,7 +74,7 @@ class UserView(mixins.CreateModelMixin,
     def create(self, request, *args, **kwargs):
         self.check_permissions(request)
         project = get_object_or_404(models.Project, pk=kwargs['project_pk'])
-        user = request.user
+        user = get_object_or_404(User, pk=request.POST.get('user'))
         role = request.POST.get('role')
 
         contrib = models.Collaborator(project=project,

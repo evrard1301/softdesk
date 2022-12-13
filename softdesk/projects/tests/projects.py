@@ -17,7 +17,8 @@ class CreateProjectTest(TestCase):
         response = self.client.post(reverse_lazy('projects:projects-list'), {
             'title': 'My project',
             'description': 'this is my project',
-            'type': models.Project.ANDROID_TYPE
+            'type': models.Project.ANDROID_TYPE,
+            'author': self.user.id
         })
 
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
@@ -54,8 +55,8 @@ class UpdateProjectTest(TestCase):
         self.client.force_authenticate(self.user)
 
         models.Collaborator.objects.create(user=self.user,
-                                          project=self.project,
-                                          role=models.Collaborator.AUTHOR_ROLE)
+                                           project=self.project,
+                                           role=models.Collaborator.AUTHOR_ROLE)
         response = self.client.put(
             reverse_lazy('projects:projects-detail', args=[self.project.id]), {
                 'title': 'My updated project',

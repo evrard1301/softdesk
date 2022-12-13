@@ -79,3 +79,5 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now=True)
+
+# PDE
